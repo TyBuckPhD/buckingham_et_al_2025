@@ -32,5 +32,5 @@ class GetVariablesWRF:
             abs_vort = getvar(wrf_data, "avo", timeidx=timeidx)
             height_agl = getvar(wrf_data, "height_agl", timeidx=timeidx)
             abs_vort_at_height = interplevel(abs_vort, height_agl, height)
-            self.absolute_vorticity = to_np(abs_vort_at_height) * 1e-5
+            self.absolute_vorticity = to_np(abs_vort_at_height) * 0.01
         return self.absolute_vorticity

@@ -74,7 +74,7 @@ def add_length_scale(ax):
         )
 
     # Add the 'km' label at the end of the scale bar
-    label_lon_km = loc_x + total_length_deg + 0.01 * total_lon  # Slightly to the right of the scale bar
+    label_lon_km = loc_x + total_length_deg + 0.02 * total_lon  # Slightly to the right of the scale bar
     ax.text(
         label_lon_km,
         loc_y + 0.005 * total_lat,  # Vertically centered on the scale bar

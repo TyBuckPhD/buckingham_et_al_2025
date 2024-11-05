@@ -3,12 +3,12 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
 class ColorbarVorticity:
-    def __init__(self, vorticity_type='Type 1', levels=None, colors=None, under_color='black', over_color='black'):
+    def __init__(self, vorticity_type='Type 1', levels=None, colors=None, under_color='darkblue', over_color='black'):
         if levels is None:
             if vorticity_type == 'Type 1':
-                self.levels = np.arange(-0.018, 0.018 + 0.003, 0.003)
+                self.levels = np.arange(-18, 18 + 3, 3)
             elif vorticity_type == 'Type 2':
-                self.levels = np.arange(-0.012, 0.012 + 0.002, 0.002)
+                self.levels = np.arange(-12, 12 + 2, 2)
             else:
                 raise ValueError("Invalid vorticity type. Choose either 'Type 1' or 'Type 2'.")
         else:
@@ -38,7 +38,7 @@ class ColorbarVorticity:
 
         white_colors = ['#FFFFFF', '#FFFFFF']
 
-        cmap_pos = plt.get_cmap('Reds', num_pos_colors + 2)
+        cmap_pos = plt.get_cmap('Greys', num_pos_colors + 2)
         pos_colors = [cmap_pos(i) for i in range(1, num_pos_colors + 1)]
 
         colors = neg_colors + white_colors + pos_colors
@@ -51,7 +51,7 @@ class ColorbarVorticity:
         self.cmap.set_over(self.over_color)
         self.norm = mcolors.BoundaryNorm(self.levels, ncolors=self.cmap.N, clip=False)
 
-    def add_colorbar(self, plot, ax, label='Vorticity'):
+    def add_colorbar(self, plot, ax, label='Absolute Vorticity ($10^{-3}$ s$^{-1}$)'):
         cbar = plt.colorbar(
             plot, ax=ax, orientation='horizontal', pad=0.02,
             shrink=0.7, aspect=30, extend='both'
