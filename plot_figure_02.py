@@ -173,7 +173,6 @@ class RainfallRatePlotter:
         plt.savefig(fig_filename, dpi=200, bbox_inches='tight', pad_inches=0.05)
         plt.show()
 
-
 if __name__ == "__main__":
     # Plot configurations
     plot_configs = [
