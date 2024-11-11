@@ -38,12 +38,6 @@ ds_nc, wrf_var, u, v, w, hgts, lats, lons = load_wrf(event, fp)
 ##############################################################################
 
 # Frontal zones (for 8-11 file).
-# ymin = [250] * len(v)
-# ymax = [850] * len(v)
-# xmin = np.linspace(300, 395, len(v))
-# xmax = np.linspace(460, 555, len(v))  
-# angle = np.linspace(-14, -8, len(v))
-
 ymin = [250] * len(v)
 ymax = [850] * len(v)
 

@@ -1,10 +1,10 @@
 import numpy as np
-from phd.variables.get_variables_manual import GetVariablesWRF
-from phd.utils.timer import Timer
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap
-from phd.utils.label_and_scale import add_length_scale  # Ensure this is correctly implemented
+from phd.variables.get_variables_manual import GetVariablesWRF
+from phd.utils.timer import Timer
+from phd.utils.label_and_scale import add_length_scale
 
 class RayleighStabilityAnalyzer:
     def __init__(self,
@@ -13,17 +13,6 @@ class RayleighStabilityAnalyzer:
                  distance: int = 5,
                  levels: list = [100, 500, 1000],
                  thresholds: list = [0, 0.1, 0.5, 1]):
-        
-        """
-        Initializes the RayleighStabilityAnalyzer with specified parameters.
-        
-        Parameters:
-        - file_path (str): Path to the WRF output NetCDF file.
-        - theta_front (float): Angle to define the front direction. Default is 22.5 degrees.
-        - distance (int): Number of grid points to consider on each side of the center for slicing. Default is 5.
-        - levels (list): List of heights (in meters) at which to perform the analysis. Default is [100, 500, 1000].
-        - thresholds (list): List of threshold values to apply in stability criteria. Default is [0, 0.1, 0.5, 1].
-        """
         
         self.file_path = file_path
         self.theta_front = theta_front

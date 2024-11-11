@@ -1,0 +1,17 @@
+{
+    "directory": "/Volumes/Samsung_T5/phd_data/2011-11-29",
+    "start_time": "08:00:00",
+    "end_time": "12:30:00",
+    "angle_start": -14,
+    "angle_end": -4,
+    
+    "ymin_start": 150,
+    "xmin_start": 280,
+    "ymax_start": 800,
+    "xmax_start": 430,
+   
+    "ymin_end": 150,
+    "xmin_end": 400,
+    "ymax_end": 850,
+    "xmax_end": 560
+}
