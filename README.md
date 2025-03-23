@@ -24,7 +24,7 @@ conda activate your_env_name
 ```
 
 ## Usage
-Unfortunately, the provided scripts are currently hard-coded to specific WRF output (which was far too large to be added into the repository); therefore, the provided scripts are expected to be used as guidelines for replication rather than as a flexible package. Development of such a package would require implementing an automated cold front detection algorithm for high-resolution gridded data - which is an exceedingly challenging task. 
+Unfortunately, the provided scripts are currently hard-coded to specific WRF output (which was far too large to be added into the repository); therefore, the provided scripts are expected to be used as guidelines for replication rather than as a flexible package. Development of such a package would require implementing an automated cold front detection algorithm for high-resolution gridded data - an exceedingly challenging task. 
 
 However, Figure 4 is standalone, and can be run via the terminal using
 
