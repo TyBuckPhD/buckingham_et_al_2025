@@ -12,7 +12,7 @@ It includes scripts for:
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Repositary Structure](#project-structure)
+- [Repository Structure](#project-structure)
 
 ## Repository Structure
 ```plaintext
