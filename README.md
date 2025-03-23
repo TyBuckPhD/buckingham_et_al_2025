@@ -13,6 +13,8 @@ It includes scripts for:
 - [Installation](#installation)
 - [Usage](#usage)
 - [Repository Structure](#repository-structure)
+- [Data Sources](#data-sources)
+- [Contact](#contact)
 
 ## Installation
 
@@ -46,3 +48,11 @@ figures/                     # Output directory for generated figures (png files
 environment.yml              # Conda environment file for reproducibility (currently bloated)
 README.md                    # This file
 ```
+
+## Data Sources
+- The Met Office 5-min, 1-km grid-spacing precipitation-rate mosaics were accessed via CEDA (https://data.ceda.ac.uk/badc/ukmo-nimrod/data/composite/uk-1km). An account is required.
+- WRF namelists are available upon request.
+
+## Contact
+- The lead author of Buckingham et al. (2025) is available at tyjamesbuckingham@gmail.com
+
