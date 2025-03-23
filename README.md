@@ -8,6 +8,12 @@ It includes scripts for:
 - Performing the Helmholtz Decomposition on a limited domain
 - Backwards trajectory analysis from gridded data
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Repositary Structure](#project-structure)
+
 ## Repository Structure
 ```plaintext
 buckingham_et_al_2025/       # Main package with core modules
