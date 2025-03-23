@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from buckingham_et_al_2025.core.trajectory_analysis import (
     ParticleTrajectoryAnalysis,
@@ -76,11 +77,15 @@ if __name__ == "__main__":
     pta.select_trajectories()
 
     # Step 6: Plot the selected trajectories and save the figure
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    traj_filename = os.path.join(script_dir, "../figures/figure_13.png")
+    ts_filename = os.path.join(script_dir, "../figures/figure_15.png")
+
     pta.plot_selected_trajectories(
-        filename="figures/figure_13_type2_trajectories.png"
+        filename=traj_filename
     )
 
     # Step 7: Plot time series of vorticity components (absolute, stretching, tilt) for the selected trajectories
     avo, stretch, tilt = pta.plot_vorticity_components(
-        filename="figures/figure_15_type2_vorticity_budget.png"
+        filename=ts_filename
     )

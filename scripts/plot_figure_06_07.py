@@ -1,3 +1,4 @@
+import os
 import re
 import matplotlib.pyplot as plt
 import numpy as np
@@ -185,7 +186,13 @@ class CalculateFrontalStrains:
 
 if __name__ == "__main__":
     config_path = "inputs/type1_front_config.json"
-    output_fig_path = "figures/figure_06.png"  # 06 for type 1, 07 for type 2
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    fig_filename = os.path.join(
+        script_dir, "../figures/figure_06.png"
+    )  # 06 for T1, 07 for T2
+
+    output_fig_path = fig_filename
     event_type = 1  # Either 1 or 2
 
     cfs = CalculateFrontalStrains(config_path, output_fig_path, event_type)

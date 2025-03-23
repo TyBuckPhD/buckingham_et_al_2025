@@ -158,7 +158,7 @@ class RainfallRatePlotter:
         return self.plot(ax)
 
     @staticmethod
-    def create_plots(configs, fig_filename="figures/figure_01.png"):
+    def create_plots(configs):
         """Static method to create a 2x2 grid plot for UKMO and WRF data based on configurations."""
         fig, axs = plt.subplots(
             2, 2, figsize=(9, 14), subplot_kw={"projection": ccrs.Mercator()}
@@ -175,6 +175,9 @@ class RainfallRatePlotter:
 
         if precip_cmap:
             precip_cmap.add_colorbar(all_plots[0], axs.ravel().tolist())
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        fig_filename = os.path.join(script_dir, "../figures/figure_01.png")
 
         plt.savefig(
             fig_filename, dpi=200, bbox_inches="tight", pad_inches=0.05

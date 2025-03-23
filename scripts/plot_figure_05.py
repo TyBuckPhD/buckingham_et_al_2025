@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
@@ -418,8 +419,11 @@ class RayleighStabilityAnalyzer:
                 if row_idx == 0 and col_idx == 3:
                     add_length_scale(ax)
 
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        fig_filename = os.path.join(script_dir, "../figures/figure_05.png")
+
         plt.savefig(
-            "figures/figure_04b.png",
+            fig_filename,
             dpi=200,
             bbox_inches="tight",
             pad_inches=0.05,

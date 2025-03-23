@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from buckingham_et_al_2025.core.trajectory_analysis import (
     ParticleTrajectoryAnalysis,
@@ -6,11 +7,11 @@ from buckingham_et_al_2025.core.trajectory_analysis import (
 if __name__ == "__main__":
     """
     Script for analyzing particle trajectories using ParticleTrajectoryAnalysis for
-    the premisovortex environment of a Type 2 event.
+    the vortex environment of a Type 1 event.
 
     This script performs the following steps:
       1. Loads configuration parameters from a JSON file to set up the analysis.
-      2. Defines seed location ranges (x0_range, y0_range, z0_range), a vorticity threshold, a buffer, and levels.
+      2. Defines seed location ranges (x0_range, y0_range, z0_range), a vorticity threshold, and a buffer.
       3. Creates an instance of ParticleTrajectoryAnalysis with the specified parameters.
       4. Plots the initial seed locations and applies an initial filter (without labels).
       5. Interactively validates and filters the seed locations.
@@ -22,7 +23,7 @@ if __name__ == "__main__":
          for the selected trajectories and saves the corresponding figure.
 
     Configuration Parameters:
-      - config_path: Path to the JSON configuration file for Type 2 high-resolution analysis.
+      - config_path: Path to the JSON configuration file for Type 1 high-resolution analysis.
       - x0_range: Range for initial x-coordinate seed values.
       - y0_range: Range for initial y-coordinate seed values.
       - z0_range: Range for initial z-coordinate seed values (typically a single level).
@@ -32,24 +33,24 @@ if __name__ == "__main__":
 
     Output:
       - Figure files saved as:
-          'figures/figure_09_type2_trajectories.png'
-          'figures/figure_11_type2_vorticity_budget.png'
+          'figures/figure_08_type1_trajectories.png'
+          'figures/figure_10_type1_vorticity_budget.png'
     """
 
     # Define configuration parameters
-    config_path = "inputs/type2_high_resolution_config.json"  # Config file (edit as needed for pre/post vortexgenesis)
-    x0_range = [460, 500]  # Range for initial x-coordinate seed values
-    y0_range = [535, 575]  # Range for initial y-coordinate seed values
+    config_path = "inputs/type1_high_resolution_config.json"  # Config file (edit as needed for pre/post vortexgenesis)
+    x0_range = [410, 440]  # Range for initial x-coordinate seed values
+    y0_range = [118, 132]  # Range for initial y-coordinate seed values
     z0_range = [
         5
     ]  # Range for initial z-coordinate seed values (typically one level)
-    vorticity_threshold = 12  # Vorticity threshold for filtering seeds
+    vorticity_threshold = 21  # Vorticity threshold for filtering seeds
     buffer = 10  # Buffer value for seed selection
     levels = np.arange(
-        -24, 24 + 3, 3
+        -30, 30 + 3, 3
     )  # Array of vorticity levels for plotting
 
-    # Create an instance of ParticleTrajectoryAnalysis with the specified parameters
+    # Create instance of ParticleTrajectoryAnalysis
     pta = ParticleTrajectoryAnalysis(
         config_path=config_path,
         x0_range=x0_range,
@@ -76,11 +77,15 @@ if __name__ == "__main__":
     pta.select_trajectories()
 
     # Step 6: Plot the selected trajectories and save the figure
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    traj_filename = os.path.join(script_dir, "../figures/figure_12.png")
+    ts_filename = os.path.join(script_dir, "../figures/figure_14.png")
+    
     pta.plot_selected_trajectories(
-        filename="figures/figure_09_type2_trajectories.png"
+        filename=traj_filename
     )
 
     # Step 7: Plot time series of vorticity components (absolute, stretching, tilt) for the selected trajectories
     avo, stretch, tilt = pta.plot_vorticity_components(
-        filename="figures/figure_11_type2_vorticity_budget.png"
+        filename=ts_filename
     )

@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import glob
 import re
+import os
 import cartopy.crs as ccrs
 from datetime import datetime
 from shapely.geometry import Polygon
@@ -288,7 +289,7 @@ class VorticityPlotter:
         return distances_info
 
     @Timer
-    def plot_vorticity_with_inset(self, output_filename="figure_03.png"):
+    def plot_vorticity_with_inset(self):
         """
         Plots the collapsed vorticity data with an inset and a centralized colorbar.
 
@@ -510,7 +511,9 @@ class VorticityPlotter:
         cbar.set_label("Absolute Vorticity (10$^{-3}$ s$^{-1}$)")
 
         # Save and display the figure
-        fig_filename = f"figures/{output_filename}"
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        fig_filename = os.path.join(script_dir, "../figures/figure_03.png")
+        
         plt.savefig(
             fig_filename, dpi=200, bbox_inches="tight", pad_inches=0.05
         )

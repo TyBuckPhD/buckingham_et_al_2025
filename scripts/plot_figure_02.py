@@ -293,7 +293,7 @@ class RainfallRatePlotter:
         return self.plot_rainfall_rate_vorticity(ax)
 
     @staticmethod
-    def create_plots(plot_configs, fig_filename="figures/figure_02.png"):
+    def create_plots(plot_configs):
         """Static method to create and display plots for multiple configurations."""
         num_plots = len(plot_configs)
         fig, axs = plt.subplots(
@@ -320,6 +320,9 @@ class RainfallRatePlotter:
         # Add the colorbar
         if precip_cmap:
             precip_cmap.add_colorbar(all_plots[0], axs)
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        fig_filename = os.path.join(script_dir, "../figures/figure_04.png")
 
         # Save and display the figure
         plt.savefig(
