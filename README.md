@@ -14,6 +14,15 @@ It includes scripts for:
 - [Usage](#usage)
 - [Repository Structure](#project-structure)
 
+## Installation
+
+```bash
+conda env create -f environment.yml
+conda activate your_env_name
+```
+
+## Usage
+
 ## Repository Structure
 ```plaintext
 buckingham_et_al_2025/       # Main package with core modules
