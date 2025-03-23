@@ -41,13 +41,14 @@ The repository is structured as so
 ```plaintext
 buckingham_et_al_2025/       # Main package with core modules
 ├── core/                    # Core data processing functions
+├── ukmo_composites/         # UKMO precipitation mosaic processing functions
 ├── utils/                   # Utility functions (e.g., plotting helpers, timer)
 └── variables/               # Modules for variable definitions and colorbars
-ukmo_composites/             # Modules for processing UKMO composite files
-scripts/                     # Stand-alone scripts for generating figures
 figures/                     # Output directory for generated figures (png files)
-environment.yml              # Conda environment file for reproducibility (currently bloated)
+scripts/                     # Stand-alone scripts for generating figures
+inputs/                      # JSON files for input configs (hard-coded to specific WRF output)
 README.md                    # This file
+environment.yml              # Conda environment file for reproducibility (currently bloated)
 ```
 
 ## Data Sources
