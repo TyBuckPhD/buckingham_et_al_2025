@@ -4,19 +4,25 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.patches as patches
-from buckingham_et_al_2025.variables.colorbar_precipitation import ColorbarPrecipitation
+from buckingham_et_al_2025.variables.colorbar_precipitation import (
+    ColorbarPrecipitation,
+)
 from buckingham_et_al_2025.variables.get_variables_wrf import GetVariablesWRF
-from buckingham_et_al_2025.utils.label_and_scale import add_corner_label, add_length_scale
+from buckingham_et_al_2025.utils.label_and_scale import (
+    add_corner_label,
+    add_length_scale,
+)
 from buckingham_et_al_2025.utils.timer import Timer
+
 
 class RainfallRatePlotter:
     """
     Class for plotting rainfall rate and vorticity data from WRF model outputs with an inset zoom feature.
 
-    This class processes a WRF netCDF file to extract rainfall rate data and computes absolute vorticity 
-    (at a specified height) using a dedicated WRF data processor. It then generates a plot that displays the 
-    rainfall rate as filled contours with overlaid vorticity contours. An inset zoom plot is also created to show 
-    a detailed view of a specified sub-region. The inset bounds can either be provided explicitly or computed 
+    This class processes a WRF netCDF file to extract rainfall rate data and computes absolute vorticity
+    (at a specified height) using a dedicated WRF data processor. It then generates a plot that displays the
+    rainfall rate as filled contours with overlaid vorticity contours. An inset zoom plot is also created to show
+    a detailed view of a specified sub-region. The inset bounds can either be provided explicitly or computed
     by default.
 
     Attributes:
@@ -43,33 +49,47 @@ class RainfallRatePlotter:
     Methods:
       _check_file_exist:
         Validates that the input file exists; raises an error if not found.
-      
+
       _load_lat_lons:
         Loads the latitude and longitude arrays using the WRF data processor.
-      
+
       _load_rainfall_rate:
         Loads the rainfall rate data from the WRF file at a specified time index.
-      
+
       _load_absolute_vorticity:
         Computes the absolute vorticity from the WRF data at the given height and time index.
-      
+
       plot_rainfall_rate_vorticity:
         Generates a plot that overlays rainfall rate contours and vorticity contours on the main axis,
         and includes an inset zoom plot of a specified sub-region.
-      
+
       _get_default_inset_extent:
         Calculates default inset boundaries if specific inset bounds are not provided.
-      
+
       run:
         Executes all steps (file check, data loading, plotting) and returns the generated plot.
-      
+
       create_plots (staticmethod):
         Creates and displays plots for multiple configurations, arranging them in a single figure,
         and saves the resulting figure to disk.
-    """    
-    
-    def __init__(self, filename, delta, min_lat, max_lat, min_lon, max_lon, text_lines, event_type,
-                 min_lat_inset=None, max_lat_inset=None, min_lon_inset=None, max_lon_inset=None, vorticity_height=500):
+    """
+
+    def __init__(
+        self,
+        filename,
+        delta,
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon,
+        text_lines,
+        event_type,
+        min_lat_inset=None,
+        max_lat_inset=None,
+        min_lon_inset=None,
+        max_lon_inset=None,
+        vorticity_height=500,
+    ):
         self.filename = filename
         self.min_lat = min_lat
         self.max_lat = max_lat
@@ -77,13 +97,15 @@ class RainfallRatePlotter:
         self.max_lon = max_lon
         self.text_lines = text_lines
         self.event_type = event_type
-        self.vorticity_height = vorticity_height  # Height for vorticity calculation
+        self.vorticity_height = (
+            vorticity_height  # Height for vorticity calculation
+        )
         self.Rainfall_Rate_surface = None
         self.lats = None
         self.lons = None
         self.abs_vorticity = None
         self.crs = ccrs.Mercator()
-        
+
         # Inset parameters
         self.min_lat_inset = min_lat_inset
         self.max_lat_inset = max_lat_inset
@@ -94,37 +116,57 @@ class RainfallRatePlotter:
         self.wrf_data_processor = GetVariablesWRF(self.filename)
 
     def _check_file_exist(self):
-        """ Ensure the input file exists. """
+        """Ensure the input file exists."""
         if not os.path.isfile(self.filename):
             raise FileNotFoundError(f"File not found: {self.filename}")
 
     def _load_lat_lons(self):
-        """ Load latitude and longitude using the WRF data processor. """
+        """Load latitude and longitude using the WRF data processor."""
         self.lats, self.lons = self.wrf_data_processor.get_lat_lons()
 
     def _load_rainfall_rate(self):
-        """ Load rainfall rate from radar reflectivity using the WRF data processor. """
-        self.Rainfall_Rate_surface = self.wrf_data_processor.get_rainfall_rate(timeidx=5)
+        """Load rainfall rate from radar reflectivity using the WRF data processor."""
+        self.Rainfall_Rate_surface = self.wrf_data_processor.get_rainfall_rate(
+            timeidx=5
+        )
 
     def _load_absolute_vorticity(self):
-        """ Calculate absolute vorticity using the WRF data processor. """
-        self.abs_vorticity = self.wrf_data_processor.get_absolute_vorticity(height=self.vorticity_height, timeidx=5)
+        """Calculate absolute vorticity using the WRF data processor."""
+        self.abs_vorticity = self.wrf_data_processor.get_absolute_vorticity(
+            height=self.vorticity_height, timeidx=5
+        )
 
     def plot_rainfall_rate_vorticity(self, ax):
-        """ Plot rainfall rate and absolute vorticity on the provided axis with an inset zoom plot. """
+        """Plot rainfall rate and absolute vorticity on the provided axis with an inset zoom plot."""
         # Set up map features
-        ax.add_feature(cfeature.LAND, color='#F3EFE3', zorder=0)
-        ax.add_feature(cfeature.OCEAN, color='#CDEDFF', zorder=0)
-        ax.add_feature(cfeature.COASTLINE.with_scale('10m'), linewidth=0.5, color='gray', zorder=2)
+        ax.add_feature(cfeature.LAND, color="#F3EFE3", zorder=0)
+        ax.add_feature(cfeature.OCEAN, color="#CDEDFF", zorder=0)
+        ax.add_feature(
+            cfeature.COASTLINE.with_scale("10m"),
+            linewidth=0.5,
+            color="gray",
+            zorder=2,
+        )
 
         # Set extent
-        ax.set_extent([self.min_lon, self.max_lon, self.min_lat, self.max_lat], crs=ccrs.PlateCarree())
+        ax.set_extent(
+            [self.min_lon, self.max_lon, self.min_lat, self.max_lat],
+            crs=ccrs.PlateCarree(),
+        )
 
         # Plot precipitation
         precip_cmap = ColorbarPrecipitation()
-        rain_plot = ax.contourf(self.lons, self.lats, self.Rainfall_Rate_surface.squeeze(),
-                                levels=precip_cmap.levels, cmap=precip_cmap.cmap, norm=precip_cmap.norm,
-                                transform=ccrs.PlateCarree(), extend='both', zorder=1)
+        rain_plot = ax.contourf(
+            self.lons,
+            self.lats,
+            self.Rainfall_Rate_surface.squeeze(),
+            levels=precip_cmap.levels,
+            cmap=precip_cmap.cmap,
+            norm=precip_cmap.norm,
+            transform=ccrs.PlateCarree(),
+            extend="both",
+            zorder=1,
+        )
 
         # Plot vorticity contours
         if self.event_type == "Type 1":
@@ -135,8 +177,16 @@ class RainfallRatePlotter:
             levels_vort = np.linspace(-12e-3, 12e-3, 12)  # Default levels
 
         levels_vort = levels_vort[levels_vort != 0]  # Remove zero
-        ax.contour(self.lons, self.lats, self.abs_vorticity, levels=levels_vort, colors='black', linewidths=0.6,
-                   transform=ccrs.PlateCarree(), zorder=3)
+        ax.contour(
+            self.lons,
+            self.lats,
+            self.abs_vorticity,
+            levels=levels_vort,
+            colors="black",
+            linewidths=0.6,
+            transform=ccrs.PlateCarree(),
+            zorder=3,
+        )
 
         # Add corner label (before scale)
         add_corner_label(ax, self.text_lines, self.event_type)
@@ -145,44 +195,83 @@ class RainfallRatePlotter:
         add_length_scale(ax)
 
         # --- Add inset plot (zoomed-in section) ---
-        inset_extent = [self.min_lon_inset, self.max_lon_inset, self.min_lat_inset, self.max_lat_inset] \
-            if self.min_lon_inset and self.max_lon_inset and self.min_lat_inset and self.max_lat_inset \
+        inset_extent = (
+            [
+                self.min_lon_inset,
+                self.max_lon_inset,
+                self.min_lat_inset,
+                self.max_lat_inset,
+            ]
+            if self.min_lon_inset
+            and self.max_lon_inset
+            and self.min_lat_inset
+            and self.max_lat_inset
             else self._get_default_inset_extent()
-        
+        )
+
         width, height = 0.3, 0.3  # Relative size of the inset
         inset_left = 0.96 - width
         inset_bottom = 0.03
-        
+
         # Create inset
-        inset_ax = ax.inset_axes([inset_left, inset_bottom, width, height], transform=ax.transAxes, projection=ccrs.Mercator())
+        inset_ax = ax.inset_axes(
+            [inset_left, inset_bottom, width, height],
+            transform=ax.transAxes,
+            projection=ccrs.Mercator(),
+        )
         inset_ax.set_extent(inset_extent, crs=ccrs.PlateCarree())
-        
+
         # Plot inset features
-        inset_ax.add_feature(cfeature.LAND, color='#F3EFE3', zorder=0)
-        inset_ax.add_feature(cfeature.OCEAN, color='#CDEDFF', zorder=0)
-        inset_ax.add_feature(cfeature.COASTLINE.with_scale('10m'), linewidth=0.5, color='gray', zorder=2)
-        inset_ax.contourf(self.lons, self.lats, self.Rainfall_Rate_surface.squeeze(),
-                          levels=precip_cmap.levels, cmap=precip_cmap.cmap, norm=precip_cmap.norm,
-                          transform=ccrs.PlateCarree(), extend='both', zorder=1)
-        inset_ax.contour(self.lons, self.lats, self.abs_vorticity, levels=levels_vort, colors='black', linewidths=1.5,
-                         transform=ccrs.PlateCarree(), zorder=3)
-        
+        inset_ax.add_feature(cfeature.LAND, color="#F3EFE3", zorder=0)
+        inset_ax.add_feature(cfeature.OCEAN, color="#CDEDFF", zorder=0)
+        inset_ax.add_feature(
+            cfeature.COASTLINE.with_scale("10m"),
+            linewidth=0.5,
+            color="gray",
+            zorder=2,
+        )
+        inset_ax.contourf(
+            self.lons,
+            self.lats,
+            self.Rainfall_Rate_surface.squeeze(),
+            levels=precip_cmap.levels,
+            cmap=precip_cmap.cmap,
+            norm=precip_cmap.norm,
+            transform=ccrs.PlateCarree(),
+            extend="both",
+            zorder=1,
+        )
+        inset_ax.contour(
+            self.lons,
+            self.lats,
+            self.abs_vorticity,
+            levels=levels_vort,
+            colors="black",
+            linewidths=1.5,
+            transform=ccrs.PlateCarree(),
+            zorder=3,
+        )
+
         # Remove tick marks and labels from inset
         inset_ax.set_xticks([])
         inset_ax.set_yticks([])
-        
+
         # Add a thicker black border for the inset
-        inset_ax.spines['geo'].set_linewidth(2)
-        
+        inset_ax.spines["geo"].set_linewidth(2)
+
         # Add a rectangle on the main plot to show the inset location
-        rect = patches.Rectangle((inset_extent[0], inset_extent[2]),
-                                 inset_extent[1] - inset_extent[0],
-                                 inset_extent[3] - inset_extent[2],
-                                 linewidth=2, edgecolor='black',
-                                 facecolor='none', zorder=4,
-                                 transform=ccrs.PlateCarree())
+        rect = patches.Rectangle(
+            (inset_extent[0], inset_extent[2]),
+            inset_extent[1] - inset_extent[0],
+            inset_extent[3] - inset_extent[2],
+            linewidth=2,
+            edgecolor="black",
+            facecolor="none",
+            zorder=4,
+            transform=ccrs.PlateCarree(),
+        )
         ax.add_patch(rect)
-                
+
         return rain_plot, precip_cmap
 
     def _get_default_inset_extent(self):
@@ -196,7 +285,7 @@ class RainfallRatePlotter:
 
     @Timer
     def run(self, ax):
-        """ Run all steps and generate the plot. """
+        """Run all steps and generate the plot."""
         self._check_file_exist()
         self._load_lat_lons()
         self._load_rainfall_rate()
@@ -204,17 +293,22 @@ class RainfallRatePlotter:
         return self.plot_rainfall_rate_vorticity(ax)
 
     @staticmethod
-    def create_plots(plot_configs, fig_filename='figures/figure_02.png'):
-        """ Static method to create and display plots for multiple configurations. """
+    def create_plots(plot_configs, fig_filename="figures/figure_02.png"):
+        """Static method to create and display plots for multiple configurations."""
         num_plots = len(plot_configs)
-        fig, axs = plt.subplots(1, num_plots, figsize=(11, 8), subplot_kw={'projection': ccrs.Mercator()})
+        fig, axs = plt.subplots(
+            1,
+            num_plots,
+            figsize=(11, 8),
+            subplot_kw={"projection": ccrs.Mercator()},
+        )
         plt.subplots_adjust(wspace=0.05)
 
         if num_plots == 1:
             axs = [axs]
 
         for ax in axs:
-            ax.set_aspect('auto')
+            ax.set_aspect("auto")
 
         all_plots = []
         precip_cmap = None
@@ -228,14 +322,17 @@ class RainfallRatePlotter:
             precip_cmap.add_colorbar(all_plots[0], axs)
 
         # Save and display the figure
-        plt.savefig(fig_filename, dpi=200, bbox_inches='tight', pad_inches=0.05)
+        plt.savefig(
+            fig_filename, dpi=200, bbox_inches="tight", pad_inches=0.05
+        )
         plt.show()
+
 
 if __name__ == "__main__":
     # Plot configurations
     plot_configs = [
         {
-            "filename": '/Volumes/Samsung_T5/phd_data/wrfout_d03_2011-11-29_10-00-00.nc',
+            "filename": "/Volumes/Samsung_T5/phd_data/wrfout_d03_2011-11-29_10-00-00.nc",
             "delta": 10,
             "min_lat": 52.5,
             "max_lat": 54.0,
@@ -243,15 +340,14 @@ if __name__ == "__main__":
             "max_lon": -4.4,
             "text_lines": ["(a) Modelled:", "29 Nov 2011"],
             "event_type": "Type 1",
-            
             # Inset bounds
             "min_lat_inset": 53.2,
             "max_lat_inset": 53.48,
             "min_lon_inset": -5.75,
-            "max_lon_inset": -5.35
+            "max_lon_inset": -5.35,
         },
         {
-            "filename": '/Volumes/Samsung_T5/phd_data/2011-11-29/wrfout_d03_2005-11-24_14-00-00.nc',
+            "filename": "/Volumes/Samsung_T5/phd_data/2011-11-29/wrfout_d03_2005-11-24_14-00-00.nc",
             "delta": 10,
             "min_lat": 51.5,
             "max_lat": 53.0,
@@ -259,13 +355,12 @@ if __name__ == "__main__":
             "max_lon": 1.9,
             "text_lines": ["(b) Modelled:", "24 Nov 2005"],
             "event_type": "Type 2",
-            
             # Inset bounds
             "min_lat_inset": 52.02,
             "max_lat_inset": 52.24,
             "min_lon_inset": 0.06,
-            "max_lon_inset": 0.4
-        }
+            "max_lon_inset": 0.4,
+        },
     ]
 
     # Generate and display plots

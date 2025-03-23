@@ -4,17 +4,18 @@ import json
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.patches as patches
 
+
 def add_length_scale(ax):
     """
     Add a length scale bar to a map plot.
 
     This function reads scale configuration parameters from a JSON file (inputs/length_scale_config.json)
-    and draws a scale bar on the provided matplotlib Axes object. The scale bar is divided into a specified 
+    and draws a scale bar on the provided matplotlib Axes object. The scale bar is divided into a specified
     number of blocks with alternating colors and annotated with distance labels in the desired units.
-    
+
     The process includes:
       - Loading the scale configuration (length in km, units, location, number of blocks, colors, and fontsize).
-      - Calculating the length per block in km and converting this length to degrees (approximately) based 
+      - Calculating the length per block in km and converting this length to degrees (approximately) based
         on the central latitude of the map.
       - Determining the starting position for the scale bar in data coordinates using the current map extent.
       - Drawing rectangular blocks to represent each segment of the scale bar.
@@ -31,7 +32,7 @@ def add_length_scale(ax):
     """
 
     # Load the scale configuration from config.json
-    with open('inputs/length_scale_config.json', 'r') as f:
+    with open("inputs/length_scale_config.json", "r") as f:
         scale_config = json.load(f)
 
     # Extract extent of the map
@@ -70,9 +71,9 @@ def add_length_scale(ax):
             length_per_block_deg,
             0.01 * total_lat,  # Height of the scale bar
             facecolor=color1 if i % 2 == 0 else color2,
-            edgecolor='none',
+            edgecolor="none",
             transform=ccrs.PlateCarree(),
-            zorder=999
+            zorder=999,
         )
         ax.add_patch(block)
 
@@ -84,28 +85,30 @@ def add_length_scale(ax):
             label_lon,
             loc_y - 0.02 * total_lat,
             f"{int(label_km)}",
-            ha='center',
-            va='top',
+            ha="center",
+            va="top",
             fontsize=fontsize,
-            weight='bold',
-            color='black',
+            weight="bold",
+            color="black",
             transform=ccrs.PlateCarree(),
-            zorder=999
+            zorder=999,
         )
 
     # Add the 'km' label at the end of the scale bar
-    label_lon_km = loc_x + total_length_deg + 0.02 * total_lon  # Slightly to the right of the scale bar
+    label_lon_km = (
+        loc_x + total_length_deg + 0.02 * total_lon
+    )  # Slightly to the right of the scale bar
     ax.text(
         label_lon_km,
         loc_y + 0.005 * total_lat,  # Vertically centered on the scale bar
         units,
-        ha='left',
-        va='center',
+        ha="left",
+        va="center",
         fontsize=fontsize,
-        weight='bold',
-        color='black',
+        weight="bold",
+        color="black",
         transform=ccrs.PlateCarree(),
-        zorder=999
+        zorder=999,
     )
 
     # Optionally, draw a thin border around the scale bar
@@ -113,13 +116,14 @@ def add_length_scale(ax):
         (loc_x, loc_y),
         total_length_deg,
         0.01 * total_lat,  # Same height as the blocks
-        facecolor='none',
-        edgecolor='black',
+        facecolor="none",
+        edgecolor="black",
         linewidth=0.5,
         transform=ccrs.PlateCarree(),
-        zorder=999
+        zorder=999,
     )
     ax.add_patch(border)
+
 
 def add_corner_label(ax, text_lines, label_type):
     """
@@ -167,7 +171,9 @@ def add_corner_label(ax, text_lines, label_type):
     top_left_lon, top_left_lat = extent[0], extent[3]
 
     # Transform the lon/lat point to the map projection's data coordinates
-    x, y = ax.projection.transform_point(top_left_lon, top_left_lat, ccrs.PlateCarree())
+    x, y = ax.projection.transform_point(
+        top_left_lon, top_left_lat, ccrs.PlateCarree()
+    )
 
     # Transform the data coordinate to display coordinate
     display_coords = ax.transData.transform((x, y))
@@ -176,20 +182,16 @@ def add_corner_label(ax, text_lines, label_type):
     axes_coords = ax.transAxes.inverted().transform(display_coords)
 
     # Combine the text lines into a single string with line breaks
-    text_str = '\n'.join(text_lines)
+    text_str = "\n".join(text_lines)
 
     # Create the AnchoredText object with 'loc' as a positional argument
     at = AnchoredText(
         text_str,
-        'upper left',  # Required positional argument 'loc'
-        prop=dict(
-            fontsize=fontsize,
-            color=text_color,
-            weight='bold'
-        ),
+        "upper left",  # Required positional argument 'loc'
+        prop=dict(fontsize=fontsize, color=text_color, weight="bold"),
         frameon=True,
         borderpad=borderpad,  # Padding between the text and the box
-        pad=pad,              # Padding between the box and the anchor point
+        pad=pad,  # Padding between the box and the anchor point
     )
 
     # Set box alignment to align the top-left corner of the bounding box with the anchor point

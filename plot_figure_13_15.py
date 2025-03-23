@@ -1,9 +1,11 @@
 import numpy as np
-from buckingham_et_al_2025.core.trajectory_analysis import ParticleTrajectoryAnalysis
+from buckingham_et_al_2025.core.trajectory_analysis import (
+    ParticleTrajectoryAnalysis,
+)
 
 if __name__ == "__main__":
     """
-    Script for analyzing particle trajectories using ParticleTrajectoryAnalysis for 
+    Script for analyzing particle trajectories using ParticleTrajectoryAnalysis for
     the vortex environment of a Type 2 event.
 
     This script performs the following steps:
@@ -33,15 +35,19 @@ if __name__ == "__main__":
           'figures/figure_08_type1_trajectories.png'
           'figures/figure_10_type1_vorticity_budget.png'
     """
-    
+
     # Define configuration parameters
-    config_path = 'inputs/type2_high_resolution_config.json' # Config file (edit as needed for pre/post vortexgenesis)
-    x0_range = [825, 875]     # Range for initial x-coordinate seed values
-    y0_range = [400, 450]     # Range for initial y-coordinate seed values
-    z0_range = [5]            # Range for initial z-coordinate seed values (typically one level)
+    config_path = "inputs/type2_high_resolution_config.json"  # Config file (edit as needed for pre/post vortexgenesis)
+    x0_range = [825, 875]  # Range for initial x-coordinate seed values
+    y0_range = [400, 450]  # Range for initial y-coordinate seed values
+    z0_range = [
+        5
+    ]  # Range for initial z-coordinate seed values (typically one level)
     vorticity_threshold = 15  # Vorticity threshold for filtering seeds
-    buffer = 10               # Buffer value for seed selection
-    levels = np.arange(-30, 30 + 3, 3) # Array of vorticity levels for plotting
+    buffer = 10  # Buffer value for seed selection
+    levels = np.arange(
+        -30, 30 + 3, 3
+    )  # Array of vorticity levels for plotting
 
     # Create instance of ParticleTrajectoryAnalysis
     pta = ParticleTrajectoryAnalysis(
@@ -51,7 +57,7 @@ if __name__ == "__main__":
         z0_range=z0_range,
         vorticity_threshold=vorticity_threshold,
         buffer=buffer,
-        levels=levels
+        levels=levels,
     )
 
     # Step 1: Plot initial seed locations and filter seeds (without labels)
@@ -70,7 +76,11 @@ if __name__ == "__main__":
     pta.select_trajectories()
 
     # Step 6: Plot the selected trajectories and save the figure
-    pta.plot_selected_trajectories(filename='figures/figure_13_type2_trajectories.png')
+    pta.plot_selected_trajectories(
+        filename="figures/figure_13_type2_trajectories.png"
+    )
 
     # Step 7: Plot time series of vorticity components (absolute, stretching, tilt) for the selected trajectories
-    avo, stretch, tilt = pta.plot_vorticity_components(filename='figures/figure_15_type2_vorticity_budget.png')
+    avo, stretch, tilt = pta.plot_vorticity_components(
+        filename="figures/figure_15_type2_vorticity_budget.png"
+    )

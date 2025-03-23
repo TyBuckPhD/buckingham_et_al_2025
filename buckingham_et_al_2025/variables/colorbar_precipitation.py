@@ -1,6 +1,7 @@
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
+
 class ColorbarPrecipitation:
     """
     Class for creating a customized precipitation colormap and corresponding colorbar.
@@ -25,7 +26,13 @@ class ColorbarPrecipitation:
           Adds a customized horizontal colorbar to the precipitation plot.
     """
 
-    def __init__(self, levels=None, colors=None, under_color=(0, 0, 0, 0), over_color='#808080'):
+    def __init__(
+        self,
+        levels=None,
+        colors=None,
+        under_color=(0, 0, 0, 0),
+        over_color="#808080",
+    ):
         # Default levels and colors if none provided
         if levels is None:
             self.levels = [0.1, 0.25, 0.5, 1, 2, 4, 8, 12, 16, 32, 64, 96]
@@ -34,17 +41,17 @@ class ColorbarPrecipitation:
 
         if colors is None:
             self.colors = [
-                '#92ccff',  # Light blue
-                '#4ABBFF',  # Blue
-                '#03A0FF',  # Dark blue
-                '#02DAC6',  # Turquoise
-                '#86FAA9',  # Light green
-                '#FBFF10',  # Yellow
-                '#F3AE2C',  # Orange
-                '#FF0000',  # Red
-                '#FF55AD',  # Pink
-                '#E3E3E3',  # Light gray
-                '#ADAAAA'   # Gray
+                "#92ccff",  # Light blue
+                "#4ABBFF",  # Blue
+                "#03A0FF",  # Dark blue
+                "#02DAC6",  # Turquoise
+                "#86FAA9",  # Light green
+                "#FBFF10",  # Yellow
+                "#F3AE2C",  # Orange
+                "#FF0000",  # Red
+                "#FF55AD",  # Pink
+                "#E3E3E3",  # Light gray
+                "#ADAAAA",  # Gray
             ]
         else:
             self.colors = colors
@@ -60,12 +67,16 @@ class ColorbarPrecipitation:
         """
         Creates the colormap and normalization based on levels and colors.
         """
-        self.cmap = mcolors.ListedColormap(self.colors, name='RainfallRate')
-        self.norm = mcolors.BoundaryNorm(self.levels, ncolors=self.cmap.N, clip=False)
+        self.cmap = mcolors.ListedColormap(self.colors, name="RainfallRate")
+        self.norm = mcolors.BoundaryNorm(
+            self.levels, ncolors=self.cmap.N, clip=False
+        )
         self.cmap.set_under(self.under_color)
         self.cmap.set_over(self.over_color)
 
-    def add_colorbar(self, rain_plot, ax, label='Precipitation rate (mm hr$^{-1}$)'):
+    def add_colorbar(
+        self, rain_plot, ax, label="Precipitation rate (mm hr$^{-1}$)"
+    ):
         """
         Adds a customized colorbar to the precipitation plot.
 
@@ -79,8 +90,13 @@ class ColorbarPrecipitation:
         """
         # Create the colorbar
         cbar = plt.colorbar(
-            rain_plot, ax=ax, orientation='horizontal', pad=0.02,
-            shrink=0.7, aspect=30, extend='both'
+            rain_plot,
+            ax=ax,
+            orientation="horizontal",
+            pad=0.02,
+            shrink=0.7,
+            aspect=30,
+            extend="both",
         )
         # Set the ticks and labels
         cbar_ticks = self.levels

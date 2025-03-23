@@ -4,12 +4,13 @@ import pandas as pd
 from tqdm import tqdm
 from ..variables.get_variables_manual import GetVariablesWRF
 
+
 class WRFPreprocessor:
     """
     Class for preprocessing WRF model output files.
 
-    This class handles the loading, processing, and saving of WRF datasets based on a provided JSON 
-    configuration file. It leverages xarray for efficient data handling and Dask for parallel computation 
+    This class handles the loading, processing, and saving of WRF datasets based on a provided JSON
+    configuration file. It leverages xarray for efficient data handling and Dask for parallel computation
     via chunking. The preprocessing includes checking for the presence of a 'Time' dimension in each dataset,
     adding a dummy time coordinate if necessary, and saving the processed files with compression.
 
@@ -36,8 +37,14 @@ class WRFPreprocessor:
       run():
           Iterates over all WRF files obtained from the configuration, preprocessing and saving each one.
     """
-    
-    def __init__(self, config_path, output_dir='outputs', chunks='auto', dummy_time='2000-01-01T00:00:00'):
+
+    def __init__(
+        self,
+        config_path,
+        output_dir="outputs",
+        chunks="auto",
+        dummy_time="2000-01-01T00:00:00",
+    ):
         self.config_path = config_path
         self.output_dir = output_dir
         self.chunks = chunks
@@ -64,7 +71,9 @@ class WRFPreprocessor:
         except Exception as e:
             raise RuntimeError(f"Error opening dataset {filename}: {e}")
 
-    def open_multiple_datasets(self, files, concat_dim='Time', combine='nested', parallel=True):
+    def open_multiple_datasets(
+        self, files, concat_dim="Time", combine="nested", parallel=True
+    ):
         if not files:
             raise ValueError("No files provided to open_multiple_datasets.")
 
@@ -73,7 +82,7 @@ class WRFPreprocessor:
                 files,
                 combine=combine,
                 concat_dim=concat_dim,
-                parallel=parallel
+                parallel=parallel,
             )
             return ds
         except FileNotFoundError as e:
@@ -82,14 +91,16 @@ class WRFPreprocessor:
             raise RuntimeError(f"Error opening multiple datasets: {e}")
 
     def add_time_dimension(self, ds):
-        if 'Time' not in ds.dims:
+        if "Time" not in ds.dims:
             # Add a new 'Time' dimension
-            ds = ds.expand_dims('Time')
+            ds = ds.expand_dims("Time")
 
             # Assign a dummy Time coordinate
-            ds['Time'] = ('Time', self.dummy_time)
+            ds["Time"] = ("Time", self.dummy_time)
 
-            print("Added 'Time' dimension with a dummy timestamp to the dataset.")
+            print(
+                "Added 'Time' dimension with a dummy timestamp to the dataset."
+            )
         else:
             print("'Time' dimension already exists in the dataset.")
         return ds
@@ -113,8 +124,10 @@ class WRFPreprocessor:
             output_file = os.path.join(self.output_dir, f"{name}{ext}")
 
             # Save the modified dataset with compression
-            encoding = {var: {'zlib': True, 'complevel': 5} for var in ds.data_vars}
-            ds.to_netcdf(output_file, format='NETCDF4', encoding=encoding)
+            encoding = {
+                var: {"zlib": True, "complevel": 5} for var in ds.data_vars
+            }
+            ds.to_netcdf(output_file, format="NETCDF4", encoding=encoding)
             print(f"Processed and saved: {output_file}")
 
             # Close the dataset
@@ -134,13 +147,16 @@ class WRFPreprocessor:
         for file in tqdm(self.files, desc="Processing WRF files"):
             self.preprocess_and_save(input_file=file)
 
+
 # Example usage
 if __name__ == "__main__":
     # Define the path to your JSON configuration file
-    config_path = 'inputs/type1_front_config.json'
+    config_path = "inputs/type1_front_config.json"
 
     # Instantiate the WRFPreprocessor class
-    preprocessor = WRFPreprocessor(config_path=config_path, output_dir='outputs')
+    preprocessor = WRFPreprocessor(
+        config_path=config_path, output_dir="outputs"
+    )
 
     # Run the preprocessing
     preprocessor.run()
