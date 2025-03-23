@@ -2,7 +2,7 @@ import os
 import xarray as xr
 import pandas as pd
 from tqdm import tqdm
-from phd.variables.get_variables_manual import GetVariablesWRF
+from ..variables.get_variables_manual import GetVariablesWRF
 
 class WRFPreprocessor:
     """

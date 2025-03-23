@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap
-from phd.variables.get_variables_manual import GetVariablesWRF
-from phd.utils.timer import Timer
-from phd.utils.label_and_scale import add_length_scale
+from buckingham_et_al_2025.variables.get_variables_manual import GetVariablesWRF
+from buckingham_et_al_2025.utils.timer import Timer
+from buckingham_et_al_2025.utils.label_and_scale import add_length_scale
 
 class RayleighStabilityAnalyzer:
     """

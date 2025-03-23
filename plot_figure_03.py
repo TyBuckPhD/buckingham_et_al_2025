@@ -9,9 +9,9 @@ from shapely.geometry import Polygon
 from matplotlib.path import Path
 from scipy.spatial.distance import pdist, squareform
 from pyproj import Geod
-from phd.variables.get_variables_manual import GetVariablesWRF
-from phd.utils.label_and_scale import add_length_scale
-from phd.utils.timer import Timer
+from buckingham_et_al_2025.variables.get_variables_manual import GetVariablesWRF
+from buckingham_et_al_2025.utils.label_and_scale import add_length_scale
+from buckingham_et_al_2025.utils.timer import Timer
 
 class VorticityPlotter:
     """

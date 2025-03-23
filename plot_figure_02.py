@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.patches as patches
-from phd.variables.colorbar_precipitation import ColorbarPrecipitation
-from phd.variables.get_variables_wrf import GetVariablesWRF
-from phd.utils.label_and_scale import add_corner_label, add_length_scale
-from phd.utils.timer import Timer
+from buckingham_et_al_2025.variables.colorbar_precipitation import ColorbarPrecipitation
+from buckingham_et_al_2025.variables.get_variables_wrf import GetVariablesWRF
+from buckingham_et_al_2025.utils.label_and_scale import add_corner_label, add_length_scale
+from buckingham_et_al_2025.utils.timer import Timer
 
 class RainfallRatePlotter:
     """

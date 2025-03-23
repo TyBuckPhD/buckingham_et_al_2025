@@ -1,39 +1,39 @@
-"""
-Script for analyzing particle trajectories using ParticleTrajectoryAnalysis for 
-the vortex environment of a Type 1 event.
-
-This script performs the following steps:
-  1. Loads configuration parameters from a JSON file to set up the analysis.
-  2. Defines seed location ranges (x0_range, y0_range, z0_range), a vorticity threshold, and a buffer.
-  3. Creates an instance of ParticleTrajectoryAnalysis with the specified parameters.
-  4. Plots the initial seed locations and applies an initial filter (without labels).
-  5. Interactively validates and filters the seed locations.
-  6. Computes particle trajectories based on the validated seeds.
-  7. Re-plots the seed locations with labels after displaying 3D trajectory plots.
-  8. Selects trajectories of interest.
-  9. Plots the selected trajectories and saves the resulting figure.
- 10. Plots time series of vorticity components (absolute vorticity, stretching, and tilt)
-     for the selected trajectories and saves the corresponding figure.
-
-Configuration Parameters:
-  - config_path: Path to the JSON configuration file for Type 1 high-resolution analysis.
-  - x0_range: Range for initial x-coordinate seed values.
-  - y0_range: Range for initial y-coordinate seed values.
-  - z0_range: Range for initial z-coordinate seed values (typically a single level).
-  - vorticity_threshold: Threshold value for filtering seeds based on vorticity.
-  - buffer: Buffer value to adjust seed selection criteria.
-  - levels: Array of levels (e.g., strain thresholds) used in the analysis.
-
-Output:
-  - Figure files saved as:
-      'figures/figure_08_type1_trajectories.png'
-      'figures/figure_10_type1_vorticity_budget.png'
-"""
-
 import numpy as np
-from phd.core.trajectory_analysis import ParticleTrajectoryAnalysis
+from buckingham_et_al_2025.core.trajectory_analysis import ParticleTrajectoryAnalysis
 
 if __name__ == "__main__":
+    """
+    Script for analyzing particle trajectories using ParticleTrajectoryAnalysis for 
+    the vortex environment of a Type 1 event.
+    
+    This script performs the following steps:
+      1. Loads configuration parameters from a JSON file to set up the analysis.
+      2. Defines seed location ranges (x0_range, y0_range, z0_range), a vorticity threshold, and a buffer.
+      3. Creates an instance of ParticleTrajectoryAnalysis with the specified parameters.
+      4. Plots the initial seed locations and applies an initial filter (without labels).
+      5. Interactively validates and filters the seed locations.
+      6. Computes particle trajectories based on the validated seeds.
+      7. Re-plots the seed locations with labels after displaying 3D trajectory plots.
+      8. Selects trajectories of interest.
+      9. Plots the selected trajectories and saves the resulting figure.
+     10. Plots time series of vorticity components (absolute vorticity, stretching, and tilt)
+         for the selected trajectories and saves the corresponding figure.
+    
+    Configuration Parameters:
+      - config_path: Path to the JSON configuration file for Type 1 high-resolution analysis.
+      - x0_range: Range for initial x-coordinate seed values.
+      - y0_range: Range for initial y-coordinate seed values.
+      - z0_range: Range for initial z-coordinate seed values (typically a single level).
+      - vorticity_threshold: Threshold value for filtering seeds based on vorticity.
+      - buffer: Buffer value to adjust seed selection criteria.
+      - levels: Array of levels (e.g., strain thresholds) used in the analysis.
+    
+    Output:
+      - Figure files saved as:
+          'figures/figure_08_type1_trajectories.png'
+          'figures/figure_10_type1_vorticity_budget.png'
+    """
+
     # Define configuration parameters
     config_path = 'inputs/type1_high_resolution_config.json' # Config file (edit as needed for pre/post vortexgenesis)
     x0_range = [410, 440]     # Range for initial x-coordinate seed values

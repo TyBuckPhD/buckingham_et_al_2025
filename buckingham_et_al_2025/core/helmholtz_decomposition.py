@@ -7,8 +7,8 @@ import matplotlib.patches as patches
 from datetime import datetime
 from scipy.ndimage import rotate
 from pynhhd import nHHD
-from phd.variables.get_variables_manual import GetVariablesWRF
-from phd.utils.timer import Timer
+from ..variables.get_variables_manual import GetVariablesWRF
+from ..utils.timer import Timer
 
 class HelmholtzDecomposition:
     """

@@ -8,10 +8,10 @@ from matplotlib.gridspec import GridSpec
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from geopy.distance import distance as geopy_distance
-from phd.variables.get_variables_manual import GetVariablesWRF
-from phd.variables.colorbar_vorticity import ColorbarVorticity
-from phd.core.backward_trajectories import BackwardParticleTrajectories
-from phd.utils.timer import Timer
+from ..variables.get_variables_manual import GetVariablesWRF
+from ..variables.colorbar_vorticity import ColorbarVorticity
+from ..core.backward_trajectories import BackwardParticleTrajectories
+from ..utils.timer import Timer
 
 class ParticleTrajectoryAnalysis:
     """

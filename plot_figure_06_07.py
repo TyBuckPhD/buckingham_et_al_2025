@@ -1,7 +1,7 @@
 import re
 import matplotlib.pyplot as plt
 import numpy as np
-from phd.core.helmholtz_decomposition import HelmholtzDecomposition
+from buckingham_et_al_2025.core.helmholtz_decomposition import HelmholtzDecomposition
 
 class CalculateFrontalStrains:
     """

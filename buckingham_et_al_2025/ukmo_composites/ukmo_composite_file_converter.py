@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from pyproj import Transformer
-from phd.variables.colorbar_precipitation import ColorbarPrecipitation
+from ..variables.colorbar_precipitation import ColorbarPrecipitation
 
 class UKMOCompositeProcessor:
     """

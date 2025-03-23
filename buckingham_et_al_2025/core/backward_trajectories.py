@@ -3,8 +3,8 @@ import xarray as xr
 import dask.array as da
 from scipy.interpolate import interpn, RegularGridInterpolator
 from scipy.integrate import cumulative_trapezoid
-from phd.variables.get_variables_manual import GetVariablesWRF
-from phd.utils.timer import Timer
+from ..variables.get_variables_manual import GetVariablesWRF
+from ..utils.timer import Timer
 
 class BackwardParticleTrajectories:
     """
