@@ -6,10 +6,30 @@ import matplotlib.patches as patches
 
 def add_length_scale(ax):
     """
-    Adds a dynamic scale bar with alternating black and white blocks to the given Axes object.
+    Add a length scale bar to a map plot.
+
+    This function reads scale configuration parameters from a JSON file (inputs/length_scale_config.json)
+    and draws a scale bar on the provided matplotlib Axes object. The scale bar is divided into a specified 
+    number of blocks with alternating colors and annotated with distance labels in the desired units.
+    
+    The process includes:
+      - Loading the scale configuration (length in km, units, location, number of blocks, colors, and fontsize).
+      - Calculating the length per block in km and converting this length to degrees (approximately) based 
+        on the central latitude of the map.
+      - Determining the starting position for the scale bar in data coordinates using the current map extent.
+      - Drawing rectangular blocks to represent each segment of the scale bar.
+      - Annotating each block division with distance labels.
+      - Adding a unit label (e.g., "km") at the end of the scale bar.
+      - Optionally drawing a thin border around the entire scale bar.
+
     Parameters:
-    - ax: The Axes object to draw on.
+      ax (matplotlib.axes.Axes): The Axes object on which the scale bar will be added. The Axes should have a
+                                  projection compatible with PlateCarree (e.g., Cartopy axes).
+
+    Returns:
+      None
     """
+
     # Load the scale configuration from config.json
     with open('inputs/length_scale_config.json', 'r') as f:
         scale_config = json.load(f)
@@ -103,13 +123,26 @@ def add_length_scale(ax):
 
 def add_corner_label(ax, text_lines, label_type):
     """
-    Adds a corner label to the plot.
+    Add a multi-line corner label to a plot.
+
+    This function adds a label in the top-left corner of the plot with customizable text and color
+    schemes based on the specified label type. The label is positioned relative to the axes using the
+    projection's coordinate transformations.
 
     Parameters:
-    - ax: The Axes object to draw on.
-    - text_lines: List of text lines to display in the label.
-    - label_type: String indicating the type ("Type 1" or "Type 2") for color schemes.
+      ax (matplotlib.axes.Axes): The Axes object on which to add the label.
+      text_lines (list of str): List of text lines to include in the label.
+      label_type (str): A string indicating the label type. Supported values are "Type 1" and "Type 2".
+                        "Type 1" applies a lightskyblue background with dodgerblue border,
+                        while "Type 2" applies a tomato background with dark red border.
+
+    Raises:
+      ValueError: If label_type is not "Type 1" or "Type 2".
+
+    Returns:
+      None
     """
+
     # Common properties
     fontsize = 13
     text_color = "white"

@@ -14,6 +14,60 @@ from phd.core.backward_trajectories import BackwardParticleTrajectories
 from phd.utils.timer import Timer
 
 class ParticleTrajectoryAnalysis:
+    """
+    Class for performing particle trajectory analysis using WRF model data.
+
+    This class seeds particles within a specified region based on user-defined ranges (x0_range, y0_range, z0_range)
+    and a vorticity threshold. It then computes trajectories for these particles using backward integration (via
+    BackwardParticleTrajectories), and provides various plotting routines to visualize the results in both 2D and 3D.
+    Additionally, the class supports interactive filtering and selection of trajectories for detailed time series
+    analysis of absolute vorticity, stretching, tilting, and height.
+
+    Attributes:
+      config_path (str): Path to the configuration file for WRF data.
+      x0_range (list): Range for initial x-coordinate seed indices.
+      y0_range (list): Range for initial y-coordinate seed indices.
+      z0_range (list): Range for initial z-coordinate seed indices.
+      vorticity_threshold (float): Threshold for filtering seeds based on absolute vorticity.
+      buffer (int): Buffer value to expand the region of interest around the seeds.
+      levels (array-like, optional): Levels for the vorticity colormap; used in visualizations.
+      
+      gvw (GetVariablesWRF): Instance to load WRF data.
+      lats, lons (xarray.DataArray): Latitude and longitude grids.
+      avo (xarray.DataArray): Absolute vorticity data from the WRF file.
+      vorticity_data (xarray.DataArray): Vorticity data from the last time step.
+      vorticity_cmap (ColorbarVorticity): Colormap object for visualizing vorticity.
+      
+      x_seeds, y_seeds, z_seeds (ndarray): Filtered seed indices for particles.
+      lon_seeds, lat_seeds (ndarray): Longitude and latitude values corresponding to the seed indices.
+      seed_vorticity (ndarray): Vorticity values at the seed locations.
+      
+      traj_lon, traj_lat, traj_z (ndarray): Arrays storing the computed trajectories of particles over time.
+      traj_avo, traj_stretching, traj_tilting (ndarray): Trajectory time series of absolute vorticity anomaly,
+          stretching, and tilting, respectively.
+      selected_indices (list): Indices of trajectories selected by the user for further analysis.
+
+    Methods:
+      plot_seed_locations_and_filter(labels=False):
+          Plots the initial seed locations over a zoomed vorticity field, filters out seeds with vorticity below
+          the threshold, and optionally annotates each seed with its index.
+      validate_and_filter_seeds():
+          Provides an interactive prompt to allow the user to remove undesired seeds.
+      compute_trajectories():
+          Computes particle trajectories by invoking a backward integration using BackwardParticleTrajectories,
+          and stores trajectory data including positions, vorticity anomaly, stretching, and tilting.
+      plot_trajectories_with_vorticity(buffer=0.01):
+          Plots the computed trajectories over the vorticity field on a 2D map.
+      plot_trajectories_3d_with_vorticity(contour_value=9, buffer=0.01):
+          Plots the computed trajectories in 3D, with a filled contour at the starting height representing vorticity.
+      plot_trajectories_3d_with_tilting_stretching(contour_value=9, buffer=0.01):
+          Plots 3D trajectories colored by tilting and stretching terms using a bivariate colormap.
+      select_trajectories():
+          Interactively allows the user to select specific trajectory indices for further analysis.
+      plot_vorticity_components(filename='default_vorticity_components.png'):
+          Plots time series of absolute vorticity, stretching, tilting, and particle height for the selected trajectories.
+    """
+
     def __init__(self, config_path, x0_range, y0_range, z0_range, vorticity_threshold=9, buffer=15, levels=None):
         self.config_path = config_path
         self.x0_range = x0_range

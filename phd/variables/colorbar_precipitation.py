@@ -2,16 +2,30 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
 class ColorbarPrecipitation:
-    def __init__(self, levels=None, colors=None, under_color=(0, 0, 0, 0), over_color='#808080'):
-        """
-        Initializes the PrecipitationColormap class with default or custom levels and colors.
+    """
+    Class for creating a customized precipitation colormap and corresponding colorbar.
 
-        Parameters:
-            levels: Optional list of levels for the colormap.
-            colors: Optional list of colors corresponding to the levels.
-            under_color: Color for values below the minimum level.
-            over_color: Color for values above the maximum level.
-        """
+    This class constructs a ListedColormap for precipitation rate visualization based on specified
+    level boundaries and colors. It also creates a BoundaryNorm for mapping data values to the discrete
+    color levels. In addition, it provides a method to add a formatted, horizontal colorbar to precipitation
+    plots.
+
+    Attributes:
+      levels (list): List of threshold values defining the boundaries for precipitation rates.
+      colors (list): List of colors corresponding to the intervals defined by levels.
+      under_color (tuple or str): Color to use for values below the minimum level.
+      over_color (tuple or str): Color to use for values above the maximum level.
+      cmap (ListedColormap): The constructed colormap.
+      norm (BoundaryNorm): The normalization instance mapping data values to colormap intervals.
+
+    Methods:
+      _create_colormap():
+          Creates the ListedColormap and BoundaryNorm based on the provided levels and colors.
+      add_colorbar(rain_plot, ax, label='Precipitation rate (mm hr$^{-1}$)'):
+          Adds a customized horizontal colorbar to the precipitation plot.
+    """
+
+    def __init__(self, levels=None, colors=None, under_color=(0, 0, 0, 0), over_color='#808080'):
         # Default levels and colors if none provided
         if levels is None:
             self.levels = [0.1, 0.25, 0.5, 1, 2, 4, 8, 12, 16, 32, 64, 96]

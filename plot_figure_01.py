@@ -9,6 +9,55 @@ from phd.utils.timer import Timer
 from phd.ukmo_composites.ukmo_composite_file_converter import UKMOCompositeProcessor
 
 class RainfallRatePlotter:
+    """
+    Class for plotting rainfall rate data from both WRF model outputs and UKMO composite datasets.
+
+    This class determines the type of input file (WRF netCDF or UKMO composite .dat) based on the file extension,
+    and then processes the data accordingly:
+      - Uses GetVariablesWRF for extracting data from WRF files.
+      - Uses UKMOCompositeProcessor for processing UKMO composite data.
+
+    Attributes:
+      filename (str): Path to the input data file.
+      min_lat (float): Minimum latitude for the plot extent.
+      max_lat (float): Maximum latitude for the plot extent.
+      min_lon (float): Minimum longitude for the plot extent.
+      max_lon (float): Maximum longitude for the plot extent.
+      text_lines (list of str): Text lines for annotating the plot.
+      event_type (str): A label to describe the event type (used in plot annotations).
+      Rainfall_Rate_surface (ndarray): 2D array holding the rainfall rate data.
+      lats (ndarray): 2D array of latitudes corresponding to the data grid.
+      lons (ndarray): 2D array of longitudes corresponding to the data grid.
+      processor (UKMOCompositeProcessor): Instance for processing UKMO composite data (if applicable).
+      is_wrf_file (bool): True if the provided file is a WRF netCDF file; otherwise, assumes UKMO composite format.
+      wrf_data_processor (GetVariablesWRF): Instance for extracting variables from a WRF file.
+
+    Methods:
+      _check_file_exist:
+        Ensures that the input file exists; raises an error if it does not.
+      
+      _load_lat_lons_wrf:
+        Loads the latitude and longitude arrays from a WRF file.
+      
+      _load_rainfall_rate_wrf:
+        Extracts the rainfall rate data from a WRF file using the GetVariablesWRF instance.
+      
+      _load_rainfall_rate_ukmo:
+        Processes the UKMO composite data file to extract rainfall rate and corresponding grid coordinates.
+      
+      plot:
+        Plots the rainfall rate data using Cartopy on a given axis, adds map features (land, ocean, coastlines),
+        and annotates the plot with labels and a length scale.
+      
+      run:
+        Orchestrates the data processing and plotting by checking the file, loading the data (WRF or UKMO),
+        and then generating the plot. The execution is timed using the Timer decorator.
+      
+      create_plots (staticmethod):
+        Generates a 2x2 grid of subplots based on a list of configuration dictionaries, each specifying
+        file paths and plotting extents, and then saves and displays the final composite figure.
+    """    
+    
     def __init__(self, filename, min_lat=None, max_lat=None, min_lon=None, max_lon=None, text_lines=None, event_type=None):
         self.filename = filename
         self.min_lat = min_lat

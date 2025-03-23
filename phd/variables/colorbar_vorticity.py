@@ -3,6 +3,39 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
 class ColorbarVorticity:
+    """
+    Class for creating a customized vorticity colormap and corresponding colorbar for visualizing
+    absolute vorticity data.
+
+    This class generates a discrete colormap (ListedColormap) based on specified levels and colors,
+    applying an optional alpha (opacity) value to all colors. If no levels or colors are provided, default
+    values are used based on the vorticity type. The class also provides a method to add a horizontal
+    colorbar to a plot, with ticks set to display every other level.
+
+    Attributes:
+      vorticity_type (str): Specifies the vorticity type ("Type 1" or "Type 2"); used to determine default levels.
+      levels (array-like): List or array of level boundaries for the colormap.
+      colors (list): List of color strings or values used for constructing the colormap.
+      alpha (float): Opacity value (between 0.0 and 1.0) applied to all colors.
+      under_color (RGBA tuple or str): Color for data values below the lowest level.
+      over_color (RGBA tuple or str): Color for data values above the highest level.
+      orientation (str): Orientation of the colorbar (e.g., "horizontal").
+      cmap (ListedColormap): The constructed colormap.
+      norm (BoundaryNorm): The normalization object mapping data values to colormap intervals.
+
+    Methods:
+      _apply_alpha(color, alpha):
+          Converts a color to an RGBA tuple with the specified alpha.
+      _get_default_colors():
+          Generates a default list of colors for the colormap based on the number of intervals defined by levels.
+      _create_colormap():
+          Constructs the ListedColormap and corresponding BoundaryNorm based on levels and colors, and sets the
+          under and over colors.
+      add_colorbar(plot, ax, pad=0.02):
+          Adds a horizontal colorbar to the given Axes object using the generated colormap and normalization.
+          The colorbar displays every other tick from the defined levels with formatted labels.
+    """
+
     def __init__(self, vorticity_type='Type 1', levels=None, colors=None, alpha=1.0, under_color='darkblue', over_color='black', orientation='horizontal'):
         if levels is None:
             if vorticity_type == 'Type 1':

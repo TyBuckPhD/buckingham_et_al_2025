@@ -2,7 +2,26 @@ import cartopy.crs as ccrs
 
 def get_wrf_crs(ds):
     """
-    Extract the projection information from the WRF dataset and construct a Cartopy CRS.
+    Extract the projection information from a WRF dataset and construct a corresponding Cartopy CRS.
+
+    This function reads the 'MAP_PROJ' attribute from the input dataset to determine the type of map 
+    projection used by the WRF model. Depending on the value of 'MAP_PROJ', it extracts additional 
+    projection parameters (such as TRUELAT1, TRUELAT2, STAND_LON, and MOAD_CEN_LAT) and constructs the 
+    appropriate Cartopy CRS object. Supported projections include:
+      - MAP_PROJ == 1: Lambert Conformal Conic projection.
+      - MAP_PROJ == 2: Stereographic projection.
+      - MAP_PROJ == 3: Mercator projection.
+      - MAP_PROJ == 6: Plate Carree projection (geographic).
+    
+    Parameters:
+      ds: A dataset (e.g., an xarray.Dataset) containing WRF projection attributes such as
+          'MAP_PROJ', 'TRUELAT1', 'TRUELAT2', 'STAND_LON', and optionally 'MOAD_CEN_LAT'.
+    
+    Returns:
+      A Cartopy CRS object representing the WRF projection.
+    
+    Raises:
+      ValueError: If the MAP_PROJ attribute is not one of the supported projection types.
     """
     map_proj = int(ds.MAP_PROJ)
 

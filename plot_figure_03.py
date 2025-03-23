@@ -15,7 +15,54 @@ from phd.utils.timer import Timer
 
 class VorticityPlotter:
     """
-    A class to compute and plot collapsed vorticity data with an inset and centralized colorbar.
+    Class for computing and plotting collapsed vorticity data from WRF files with an inset plot 
+    and a centralized colorbar.
+
+    This class processes a set of WRF files located in a specified directory that fall within a 
+    given time range. It computes the collapsed (maximum absolute) vorticity over time, applies a mask 
+    based on a threshold, and then plots the vorticity data. The plot includes a main map and an inset 
+    zoomed view defined by a polygon. Additionally, the inset plot displays markers with connecting 
+    dashed lines (and calculates distances between these markers), and the figure features a centralized 
+    horizontal colorbar.
+
+    Attributes:
+      directory (str): Path to the directory containing WRF files.
+      start_time (str): Start time (formatted as "HH:MM:SS") for selecting files.
+      end_time (str): End time (formatted as "HH:MM:SS") for selecting files.
+      vorticity_threshold (float): Threshold for masking vorticity values (absolute value).
+      vorticity_type (str): Type of vorticity ('Type 1' or 'Type 2') determining contour levels.
+      lon_corners (list of float): Longitudes defining the corners of the polygon for the inset.
+      lat_corners (list of float): Latitudes defining the corners of the polygon for the inset.
+      polygon_coords (list of tuples): List of (lon, lat) tuples for the polygon.
+      marker_lons (list of float): Longitudes of markers to plot in the inset.
+      marker_lats (list of float): Latitudes of markers to plot in the inset.
+      vorticity_collapsed (np.ndarray): Collapsed vorticity data computed over time.
+      lats (np.ndarray): Array of latitude values from the WRF data.
+      lons (np.ndarray): Array of longitude values from the WRF data.
+      times (list of str): List of time strings extracted from the processed files.
+      geod (pyproj.Geod): Instance of Geod for geodetic calculations.
+
+    Methods:
+      compute_collapsed_vorticity:
+        Processes WRF files in the specified directory within the time range, computes the absolute 
+        vorticity for each, masks values below the threshold, and collapses the data over time.
+      
+      _define_levels:
+        Defines contour levels for plotting based on the selected vorticity type.
+      
+      _create_colormap:
+        Creates a custom colormap and normalization based on the defined contour levels.
+      
+      _calculate_distances:
+        Calculates distances (in kilometers) between consecutive marker pairs using geodetic calculations.
+      
+      plot_vorticity_with_inset:
+        Plots the collapsed vorticity on a main map and creates an inset zoom plot defined by a polygon. 
+        The inset includes markers, dashed connecting lines, and a centralized horizontal colorbar.
+      
+      run:
+        Executes the computation of collapsed vorticity and plots the resulting figure, returning the 
+        distances between marker pairs.
     """
     
     def __init__(self, directory, start_time, end_time):

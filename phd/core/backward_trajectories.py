@@ -7,6 +7,58 @@ from phd.variables.get_variables_manual import GetVariablesWRF
 from phd.utils.timer import Timer
 
 class BackwardParticleTrajectories:
+    """
+    Class for computing backward particle trajectories using WRF data and a predictor-corrector integration approach.
+
+    This class loads wind, height, and coordinate data from a WRF file (specified via a configuration file),
+    computes the necessary velocity gradients, and then integrates particle positions backward in time using a
+    two-step predictor-corrector method. In addition, it calculates the vorticity anomaly (the deviation of the 
+    instantaneous vorticity from the baseline at the final time) and the cumulative integrals for stretching and 
+    tilting along the trajectories.
+
+    Attributes:
+      config_path (str): Path to the configuration file for WRF data.
+      dt (float): Time step for trajectory integration.
+      grid_spacing (float): Horizontal grid spacing (used to compute physical coordinates).
+      x_seeds (int or array-like): Seed indices for the x-coordinate.
+      y_seeds (int or array-like): Seed indices for the y-coordinate.
+      z_seeds (int or array-like): Seed indices for the z-coordinate.
+      f (float): Coriolis parameter (if needed).
+      
+      lats (xarray.DataArray): Latitude grid loaded from the WRF file.
+      lons (xarray.DataArray): Longitude grid loaded from the WRF file.
+      u, v, w (xarray.DataArray): Wind components (zonal, meridional, vertical) from the WRF file.
+      height_agl (xarray.DataArray): Geopotential height above ground level.
+      
+      dx, dy (float): Horizontal grid spacing (same as grid_spacing).
+      dz (float): Vertical grid spacing derived from the WRF data.
+      
+      nt, nz, ny, nx (int): Dimensions of the wind data (time, vertical levels, latitude, longitude).
+      x_coords (np.ndarray): Physical x-coordinate values computed from grid spacing.
+      y_coords (np.ndarray): Physical y-coordinate values computed from grid spacing.
+      z_coords (np.ndarray): Vertical coordinate values obtained from height_agl.
+      
+      x0, y0, z0 (np.ndarray): Physical coordinates corresponding to the provided seed indices.
+      
+      du_dx, du_dy, du_dz, dv_dx, dv_dy, dv_dz, dw_dx, dw_dy, dw_dz (xarray.DataArray):
+          Velocity gradient fields computed from the wind components.
+    
+    Methods:
+      _load_data():
+          Loads WRF data including wind components, geopotential height, and grid coordinates, and sets up
+          the physical coordinate arrays and seed positions.
+      _compute_velocity_gradients():
+          Computes gradients of the wind components along x, y, and z using Dask arrays and converts them to
+          xarray.DataArrays with appropriate coordinates.
+      compute_trajectories():
+          Computes backward particle trajectories using a two-step predictor-corrector integration method.
+          Along the way, it computes the instantaneous vorticity anomaly and integrates stretching and tilting terms.
+          Returns:
+              - lon_traj, lat_traj, z_traj: Particle positions over time (arrays with shape [n_particles, nt]).
+              - zeta_abs_anomaly: Vorticity anomaly (vorticity minus baseline at final timestep).
+              - stretching_cumtrapz: Cumulative integrated stretching (array with shape [n_particles, nt]).
+              - tilting_cumtrapz: Cumulative integrated tilting (array with shape [n_particles, nt]).
+    """
     def __init__(self, config_path, dt, grid_spacing, x0=None, y0=None, z0=None, f=0.0):
         self.config_path = config_path
         self.dt = dt

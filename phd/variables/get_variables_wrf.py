@@ -2,6 +2,33 @@ from netCDF4 import Dataset
 from wrf import getvar, interplevel, to_np, latlon_coords
 
 class GetVariablesWRF:
+    """
+    Class for extracting and processing variables from WRF model output files.
+
+    This class provides methods to load and extract key meteorological variables from a WRF output file.
+    It uses the netCDF4 library to read the file and the wrf-python package functions (e.g., getvar, interplevel,
+    to_np, latlon_coords) to extract variables such as latitude, longitude, radar reflectivity (to compute rainfall rate),
+    and absolute vorticity. The class stores the extracted data as NumPy arrays for further processing or plotting.
+
+    Attributes:
+      filename (str): Path to the WRF output file.
+      rainfall_rate_surface (numpy.ndarray): Array containing the computed surface rainfall rate.
+      absolute_vorticity (numpy.ndarray): Array containing the computed absolute vorticity.
+      lats (numpy.ndarray): Array of latitude coordinates extracted from the dataset.
+      lons (numpy.ndarray): Array of longitude coordinates extracted from the dataset.
+
+    Methods:
+      get_lat_lons():
+          Opens the WRF file, extracts the "XLAT" variable, and returns the latitude and longitude coordinates
+          as NumPy arrays.
+      get_rainfall_rate(timeidx=0):
+          Reads the radar reflectivity (dbz) variable from the file at a specified time index, computes the rainfall
+          rate using a conversion formula, and returns the surface rainfall rate.
+      get_absolute_vorticity(height=500, timeidx=0):
+          Reads the absolute vorticity ("avo") and height above ground level ("height_agl") from the file,
+          interpolates the vorticity to a specified target height (e.g., 500 m AGL), scales the result, and returns it.
+    """
+
     def __init__(self, filename):
         self.filename = filename
         self.rainfall_rate_surface = None

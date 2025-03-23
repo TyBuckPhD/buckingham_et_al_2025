@@ -5,16 +5,39 @@ from tqdm import tqdm
 from phd.variables.get_variables_manual import GetVariablesWRF
 
 class WRFPreprocessor:
-    def __init__(self, config_path, output_dir='outputs', chunks='auto', dummy_time='2000-01-01T00:00:00'):
-        """
-        Initialize the WRFPreprocessor with configuration and output settings.
+    """
+    Class for preprocessing WRF model output files.
 
-        Parameters:
-        - config_path (str): Path to the JSON configuration file.
-        - output_dir (str, optional): Directory to save processed files. Default is 'outputs'.
-        - chunks (str or dict, optional): Chunk sizes for Dask. Default is 'auto'.
-        - dummy_time (str, optional): Dummy timestamp to assign if 'Time' dimension is missing. Default is '2000-01-01T00:00:00'.
-        """
+    This class handles the loading, processing, and saving of WRF datasets based on a provided JSON 
+    configuration file. It leverages xarray for efficient data handling and Dask for parallel computation 
+    via chunking. The preprocessing includes checking for the presence of a 'Time' dimension in each dataset,
+    adding a dummy time coordinate if necessary, and saving the processed files with compression.
+
+    Attributes:
+      config_path (str): Path to the JSON configuration file containing WRF settings.
+      output_dir (str): Directory where the processed output files will be saved.
+      chunks (str or dict): Chunk sizes for Dask operations when opening datasets.
+      dummy_time (pandas.DatetimeIndex): Dummy timestamp to assign if a dataset is missing a 'Time' dimension.
+      gvw (GetVariablesWRF): Instance to load WRF variables and configuration.
+      config (dict): Configuration parameters loaded from the JSON file.
+      files (list): List of WRF output files retrieved based on the configuration.
+
+    Methods:
+      open_single_dataset(filename):
+          Opens a single WRF dataset using xarray with the specified chunking.
+      open_multiple_datasets(files, concat_dim, combine, parallel):
+          Opens multiple WRF datasets and concatenates them along the 'Time' dimension.
+      add_time_dimension(ds):
+          Checks and adds a 'Time' dimension to a dataset if it is missing, using the dummy timestamp.
+      close_dataset(ds):
+          Closes an open xarray Dataset.
+      preprocess_and_save(input_file):
+          Processes a single WRF file by adding a time dimension (if needed), compressing, and saving the result.
+      run():
+          Iterates over all WRF files obtained from the configuration, preprocessing and saving each one.
+    """
+    
+    def __init__(self, config_path, output_dir='outputs', chunks='auto', dummy_time='2000-01-01T00:00:00'):
         self.config_path = config_path
         self.output_dir = output_dir
         self.chunks = chunks

@@ -10,6 +10,64 @@ from phd.utils.label_and_scale import add_corner_label, add_length_scale
 from phd.utils.timer import Timer
 
 class RainfallRatePlotter:
+    """
+    Class for plotting rainfall rate and vorticity data from WRF model outputs with an inset zoom feature.
+
+    This class processes a WRF netCDF file to extract rainfall rate data and computes absolute vorticity 
+    (at a specified height) using a dedicated WRF data processor. It then generates a plot that displays the 
+    rainfall rate as filled contours with overlaid vorticity contours. An inset zoom plot is also created to show 
+    a detailed view of a specified sub-region. The inset bounds can either be provided explicitly or computed 
+    by default.
+
+    Attributes:
+      filename (str): Path to the input WRF data file.
+      delta (int): A parameter to adjust analysis resolution or processing (usage context specific).
+      min_lat (float): Minimum latitude for the main plot extent.
+      max_lat (float): Maximum latitude for the main plot extent.
+      min_lon (float): Minimum longitude for the main plot extent.
+      max_lon (float): Maximum longitude for the main plot extent.
+      text_lines (list of str): Lines of text used to annotate the plot.
+      event_type (str): Identifier for the event type, which influences vorticity contour levels.
+      vorticity_height (int): Height (in meters) at which the absolute vorticity is calculated.
+      Rainfall_Rate_surface (ndarray): 2D array containing the rainfall rate data.
+      lats (ndarray): 2D array of latitude values corresponding to the data grid.
+      lons (ndarray): 2D array of longitude values corresponding to the data grid.
+      abs_vorticity (ndarray): 2D array containing computed absolute vorticity values.
+      crs (Cartopy CRS): Cartopy Mercator projection used for plotting.
+      min_lat_inset (float): Minimum latitude for the inset plot extent.
+      max_lat_inset (float): Maximum latitude for the inset plot extent.
+      min_lon_inset (float): Minimum longitude for the inset plot extent.
+      max_lon_inset (float): Maximum longitude for the inset plot extent.
+      wrf_data_processor (GetVariablesWRF): Instance for extracting variables from the WRF file.
+
+    Methods:
+      _check_file_exist:
+        Validates that the input file exists; raises an error if not found.
+      
+      _load_lat_lons:
+        Loads the latitude and longitude arrays using the WRF data processor.
+      
+      _load_rainfall_rate:
+        Loads the rainfall rate data from the WRF file at a specified time index.
+      
+      _load_absolute_vorticity:
+        Computes the absolute vorticity from the WRF data at the given height and time index.
+      
+      plot_rainfall_rate_vorticity:
+        Generates a plot that overlays rainfall rate contours and vorticity contours on the main axis,
+        and includes an inset zoom plot of a specified sub-region.
+      
+      _get_default_inset_extent:
+        Calculates default inset boundaries if specific inset bounds are not provided.
+      
+      run:
+        Executes all steps (file check, data loading, plotting) and returns the generated plot.
+      
+      create_plots (staticmethod):
+        Creates and displays plots for multiple configurations, arranging them in a single figure,
+        and saves the resulting figure to disk.
+    """    
+    
     def __init__(self, filename, delta, min_lat, max_lat, min_lon, max_lon, text_lines, event_type,
                  min_lat_inset=None, max_lat_inset=None, min_lon_inset=None, max_lon_inset=None, vorticity_height=500):
         self.filename = filename

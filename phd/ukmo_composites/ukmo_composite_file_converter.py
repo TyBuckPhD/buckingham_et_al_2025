@@ -8,6 +8,37 @@ from pyproj import Transformer
 from phd.variables.colorbar_precipitation import ColorbarPrecipitation
 
 class UKMOCompositeProcessor:
+    """
+    Class for processing UK Met Office rainfall radar composite data from NIMROD files.
+
+    This class reads binary radar composite files, extracts metadata and radar reflectivity data,
+    converts the data from OSGB (British National Grid) to UTM and then to latitude/longitude coordinates,
+    and generates a lat/lon grid for plotting. It also prepares a header string containing key metadata.
+
+    Attributes:
+      filepath (str): Path to the UKMO composite binary file.
+      transformer_osgb_to_utm (pyproj.Transformer): Transformer to convert OSGB coordinates to UTM.
+      transformer_utm_to_latlon (pyproj.Transformer): Transformer to convert UTM coordinates to latitude/longitude.
+      radar_array (np.ndarray): 2D array of radar reflectivity values (in mm/hr) after processing.
+      header (str): Metadata header containing grid information.
+      utm_corners (tuple): Tuple of UTM coordinate pairs representing the lower-left and upper-right corners.
+      grid_size (tuple): Tuple (nrows, ncols) representing the dimensions of the radar grid.
+      lat_grid (np.ndarray): 2D array of latitude values for the radar grid.
+      lon_grid (np.ndarray): 2D array of longitude values for the radar grid.
+
+    Methods:
+      ingest_file():
+          Reads and processes the binary UKMO radar composite file. It verifies record lengths,
+          extracts header data, computes grid parameters (including corners and cell size), and reads
+          the radar data. After processing, it calls _create_latlon_grid() to generate a latitude/longitude grid.
+      _create_latlon_grid():
+          Converts the UTM corner coordinates and grid size into a full lat/lon grid for plotting.
+      plot_radar_composite(extent=None, output_file="composite.png"):
+          Plots the radar composite data using a Cartopy Mercator projection. The method sets the plot extent
+          based on either a provided extent or the full grid extent, overlays map features, and applies a
+          precipitation colormap. The final plot is saved to the specified output file.
+    """
+
     def __init__(self, filepath):
         self.filepath = filepath
         self.transformer_osgb_to_utm = Transformer.from_crs("EPSG:27700", "EPSG:32630", always_xy=True)
