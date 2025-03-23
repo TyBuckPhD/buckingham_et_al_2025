@@ -24,15 +24,17 @@ conda activate your_env_name
 ## Usage
 Unfortunately, the provided scripts are currently hard-coded to specific WRF output (which was far too large to be added into the repository); therefore, the provided scripts are expected to be used as guidelines for replication rather than as a flexible package. Development of such a package would require implementing an automated cold front detection algorithm for high-resolution gridded data - which is an exceedingly challenging task. 
 
-However, Figure 4 is standalone, and can be run via the terminal using either
+However, Figure 4 is standalone, and can be run via the terminal using
 
 ```python
 Python3 scripts/plot_figure_04.py
 ```
 
-or simply executing it within your chosen IDE>
+or simply executing it within your chosen IDE.
 
 ## Repository Structure
+The repository is structured as so
+
 ```plaintext
 buckingham_et_al_2025/       # Main package with core modules
 ├── core/                    # Core data processing functions
