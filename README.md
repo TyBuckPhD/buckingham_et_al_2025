@@ -9,13 +9,13 @@ It includes scripts for:
 - Backwards trajectory analysis from gridded data
 
 ## Repository Structure
-buckingham_et_al_2025/   # Main package with core modules
-├── core/                # Core data processing functions
-├── utils/               # Utility functions (e.g., plotting helpers, timer)
-├── variables/           # Modules for variable definitions and colorbars
-├── ukmo_composites/     # Modules for processing UKMO composite files
-scripts/                 # Stand-alone scripts for generating figures
-figures/                 # Output directory for generated figures (png files)
-environment.yml          # Conda environment file for reproducibility (currently bloated)
-README.md                # This file
-
+```plaintext
+buckingham_et_al_2025/         # Main package with core modules
+├── core/                     # Core data processing functions
+├── utils/                    # Utility functions (e.g., plotting helpers, timer)
+├── variables/                # Modules for variable definitions and colorbars
+├── ukmo_composites/          # Modules for processing UKMO composite files
+├── scripts/                  # Stand-alone scripts for generating figures
+├── figures/                  # Output directory for generated figures (png files)
+├── environment.yml           # Conda environment file for reproducibility (currently bloated)
+└── README.md                 # This file
