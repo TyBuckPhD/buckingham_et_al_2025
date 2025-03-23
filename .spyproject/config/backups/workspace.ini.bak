@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = empty-project-type
-recent_files = ['old_hhd.py', 'plot_figure_04b.py', 'plot_figure_05.py', 'plot_figure_03.py']
+recent_files = ['inputs/type1_high_resolution_config.json', 'plot_figure_08_09.py', 'phd/core/trajectory_analysis.py', 'plot_configs.py', 'phd/variables/colorbar_vorticity.py']
 
 [main]
 version = 0.2.0

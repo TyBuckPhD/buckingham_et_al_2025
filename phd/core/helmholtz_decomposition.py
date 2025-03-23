@@ -1,8 +1,10 @@
+import os
 import re
 import glob
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from datetime import datetime
 from scipy.ndimage import rotate
 from pynhhd import nHHD
@@ -10,12 +12,12 @@ from phd.variables.get_variables_manual import GetVariablesWRF
 from phd.utils.timer import Timer
 
 class HelmholtzDecomposition:
-    def __init__(self, config_path):
-        # Load configuration from JSON file
+    def __init__(self, config_path, event_type, num_domains=10, plot=True):
         with open(config_path, 'r') as config_file:
             config = json.load(config_file)
+        self.event_type = event_type
+        self.num_domains = num_domains
         
-        # Extract parameters
         self.directory = config['directory']
         self.start_time = config['start_time']
         self.end_time = config['end_time']
@@ -33,256 +35,236 @@ class HelmholtzDecomposition:
         self.xmin_end = config['xmin_end']
         self.xmax_end = config['xmax_end']
         
-        # Get the list of selected files
         self.selected_files = self.get_files()
         self.num_files = len(self.selected_files)
-        
-        # Quiver cropping
-        self.crop = 10
-        
         if self.num_files == 0:
             raise ValueError("No files found in the specified time range.")
         
-        # Generate arrays for angles and bounding box coordinates
         self.generate_parameters()
-        self.plot = True  # Set to False to disable plotting
+        self.f = 1e-4  # Coriolis parameter
+        
+        self.plot = plot
 
     def get_files(self):
-        """
-        Retrieves WRF output files within the specified time range.
-        """
-        # Convert start and end times to datetime objects
         start_time_dt = datetime.strptime(self.start_time, "%H:%M:%S")
         end_time_dt = datetime.strptime(self.end_time, "%H:%M:%S")
         
-        # Load all WRF files in the directory
         files = sorted(glob.glob(f"{self.directory}/wrfout_d03_*.nc"))
         pattern = r"wrfout_d03_\d{4}-\d{2}-\d{2}_(\d{2}-\d{2}-\d{2})\.nc"
         
-        # Select files based on the time range
         selected_files = []
         for file in files:
             match = re.search(pattern, file)
             if match:
-                # Parse the time from the filename
                 file_time_str = match.group(1).replace("-", ":")
-                file_time_dt = datetime.strptime(file_time_str, "%H:%M:%S")
-                if start_time_dt <= file_time_dt <= end_time_dt:
-                    selected_files.append(file)
+                try:
+                    file_time_dt = datetime.strptime(file_time_str, "%H:%M:%S")
+                    if start_time_dt <= file_time_dt <= end_time_dt:
+                        selected_files.append(file)
+                except ValueError:
+                    print(f"Warning: Time format mismatch in file {file}. Skipping.")
         return selected_files
 
     def generate_parameters(self):
-        """
-        Generates arrays for angles and bounding box coordinates using np.linspace().
-        """
         num_files = self.num_files
         
-        # Generate angles
         self.angles = np.linspace(self.angle_start, self.angle_end, num_files).tolist()
         
-        # Generate bounding box coordinates
         self.ymins = np.linspace(self.ymin_start, self.ymin_end, num_files).astype(int).tolist()
         self.ymaxs = np.linspace(self.ymax_start, self.ymax_end, num_files).astype(int).tolist()
         self.xmins = np.linspace(self.xmin_start, self.xmin_end, num_files).astype(int).tolist()
         self.xmaxs = np.linspace(self.xmax_start, self.xmax_end, num_files).astype(int).tolist()
 
     def get_variables(self, file_path, height=500):
-        """
-        Extracts x, y coordinates and wind components at a specified height from a WRF output file.
-        """
         variables = GetVariablesWRF(file_path)
         lats, lons = variables.get_lat_lons()
         u, v = variables.get_wind_components_at_heights(height=height)
     
-        # Convert lat/lon to approximate x/y coordinates in meters
-        R = 6371000  # Earth's radius in meters
+        R = 6371000
         lats_rad = np.deg2rad(lats.values)
         lons_rad = np.deg2rad(lons.values)
         mean_lat_rad = np.mean(lats_rad)
         mean_lon_rad = np.mean(lons_rad)
     
-        # Approximate x and y (meters)
         x = R * (lons_rad - mean_lon_rad) * np.cos(mean_lat_rad)
-        y = R * (lats_rad - mean_lat_rad)  # Correct calculation
+        y = R * (lats_rad - mean_lat_rad)
     
         return x, y, u.values, v.values
 
-    def plot_wind_field(self, component, xmin, xmax, ymin, ymax, title='Wind Field', is_vector=False):
-        """
-        Plots the specified wind component with cropping rectangle.
+    def calculate_vorticity(self, u, v, dx, dy):
+        dv_dx = np.gradient(v, axis=1) / dx
+        du_dy = np.gradient(u, axis=0) / dy
+        vorticity = dv_dx - du_dy
+        return vorticity
 
-        Parameters:
-        - component: np.ndarray
-            The wind component to plot. Can be scalar or vector.
-        - xmin, xmax, ymin, ymax: int
-            Coordinates for the cropping rectangle.
-        - title: str
-            Title of the plot.
-        - is_vector: bool
-            Flag indicating if the component is a vector field.
-        """
-        plt.figure(figsize=(8, 6))
-        
-        if is_vector:
-            # Compute the magnitude of the vector field
-            magnitude = np.sqrt(component[..., 0]**2 + component[..., 1]**2)
-            plot_data = magnitude
-        else:
-            plot_data = component
-        
-        # Plot the scalar field
-        plt.pcolor(plot_data, shading='auto', cmap='viridis')
-        
-        # Define the cropping rectangle
-        xs = [xmin, xmax, xmax, xmin, xmin]
-        ys = [ymin, ymin, ymax, ymax, ymin]
-        plt.plot(xs, ys, color='black', linewidth=2)
-        
-        plt.axis('equal')
-        plt.tight_layout()
-        plt.show()
+    def perform_decomposition(self, windfield, dx, dy):
+        spacings = (dy, dx)        
+        nhhd = nHHD(grid=windfield.shape[:2], spacings=spacings)
+        nhhd.decompose(windfield)
+        return nhhd.r, nhhd.d, nhhd.h
 
-    def plot_components(self, x_cropped, y_cropped, non_div, non_rot, harmonic, idx):
-        """
-        Plots the Helmholtz components as quiver plots.
-        """
-        # Define cropping step for quiver plots
-        crop_step = self.crop
+    def rotate_field(self, field, angle):
+        return rotate(field, angle=angle, reshape=True, order=1, mode='nearest')
 
-        # Rotational component (non_div)
+    def calculate_strain_threshold(self, vorticity_front_mean, vorticity_ambient_mean, f, mu):
+        coriolis_component = f / 4
+        vorticity_component = ((vorticity_front_mean - vorticity_ambient_mean) / (vorticity_front_mean + vorticity_ambient_mean))
+        wavelength_component = np.exp(-2 * mu)
+        return coriolis_component * vorticity_component * wavelength_component
+
+    def calculate_frontal_strain(self, v_harmonic, u_harmonic, dy, dx, event_type):
+        if event_type == 1:
+            dv_dy = np.gradient(v_harmonic, dy, axis=0)
+            stretching_deformation = dv_dy.mean()
+        if event_type == 2:
+            du_dx = np.gradient(u_harmonic, dx, axis=1)
+            stretching_deformation = du_dx.mean()           
+        return stretching_deformation
+
+    def plot_frontal_domain(self, x_rotated, y_rotated, u_rotated, v_rotated, idx, xmin, xmax, ymin, ymax):
+        magnitude = np.sqrt(u_rotated**2 + v_rotated**2)
+
+        # Determine the spatial extent of the entire rotated grid
+        x_min_plot = x_rotated.min()
+        x_max_plot = x_rotated.max()
+        y_min_plot = y_rotated.min()
+        y_max_plot = y_rotated.max()
+
+        # Get the number of grid points
+        ny, nx = u_rotated.shape
+
         plt.figure(figsize=(6, 6))
-        plt.quiver(x_cropped[::crop_step, ::crop_step], y_cropped[::crop_step, ::crop_step],
-                   non_div[::crop_step, ::crop_step, 0], non_div[::crop_step, ::crop_step, 1],
-                   scale=200, pivot='mid')
-        plt.title(f'Non-Divergent Component (File {idx+1})')
-        plt.xlabel('X (meters)')
-        plt.ylabel('Y (meters)')
-        plt.axis('equal')
-        plt.tight_layout()
-        plt.show()
+        plt.imshow(
+            magnitude,
+            extent=(x_min_plot, x_max_plot, y_min_plot, y_max_plot),
+            origin='lower',
+            cmap='PuOr'
+        )
 
-        # Divergent component (non_rot)
-        plt.figure(figsize=(6, 6))
-        plt.quiver(x_cropped[::crop_step, ::crop_step], y_cropped[::crop_step, ::crop_step],
-                   non_rot[::crop_step, ::crop_step, 0], non_rot[::crop_step, ::crop_step, 1],
-                   scale=200, pivot='mid')
-        plt.title(f'Non-Rotational Component (File {idx+1})')
-        plt.xlabel('X (meters)')
-        plt.ylabel('Y (meters)')
-        plt.axis('equal')
-        plt.tight_layout()
-        plt.show()
+        # Calculate grid spacing
+        dx = (x_max_plot - x_min_plot) / nx
+        dy = (y_max_plot - y_min_plot) / ny
 
-        # Harmonic component
-        plt.figure(figsize=(6, 6))
-        plt.quiver(x_cropped[::crop_step, ::crop_step], y_cropped[::crop_step, ::crop_step],
-                   harmonic[::crop_step, ::crop_step, 0], harmonic[::crop_step, ::crop_step, 1],
-                   scale=200, pivot='mid')
-        plt.title(f'Harmonic Component (File {idx+1})')
-        plt.xlabel('X (meters)')
-        plt.ylabel('Y (meters)')
-        plt.axis('equal')
-        plt.tight_layout()
+        # Calculate rectangle position in data coordinates
+        rect_x_min = x_min_plot + xmin * dx
+        rect_y_min = y_min_plot + ymin * dy
+        width = (xmax - xmin) * dx
+        height = (ymax - ymin) * dy
+
+        # Create rectangle
+        rect = patches.Rectangle(
+            (rect_x_min, rect_y_min),
+            width,
+            height,
+            linewidth=2,
+            edgecolor='black',
+            facecolor='none'
+        )
+        plt.gca().add_patch(rect)
+
+        plt.xticks([])
+        plt.yticks([])
         plt.show()
 
     @Timer
     def run(self):
-        non_div_list = []
-        non_rot_list = []
-        harmonic_list = []
-        
+        addition = 2
+        expansions = [i * addition for i in range(self.num_domains)]
+
+        # Initialize lists to store results for each domain
+        strain_threshold_lists = [[] for _ in range(self.num_domains)]
+        frontal_strain_lists = [[] for _ in range(self.num_domains)]
+        u_harmonic_lists = [[] for _ in range(self.num_domains)]
+        v_harmonic_lists = [[] for _ in range(self.num_domains)]
+
         for idx, file_path in enumerate(self.selected_files):
-            print(f"Processing file {idx+1}/{self.num_files}: {file_path}")
+            print(f"\nProcessing file {idx+1}/{self.num_files}: {file_path}")
 
-            # Get variables from the WRF output file
+            # Get data
             x, y, u, v = self.get_variables(file_path, height=500)
-
             angle = self.angles[idx]
-
-            # Grid dimensions
-            ny, nx = u.shape
-
-            # Calculate grid spacings from x and y
-            # Assuming x and y are 1D arrays; adjust if they are 2D
-            if x.ndim == 1 and y.ndim == 1:
-                dx = np.mean(np.diff(x))
-                dy = np.mean(np.diff(y))
-            else:
-                # If x and y are 2D, calculate spacings accordingly
-                dx = np.mean(np.diff(x, axis=1))
-                dy = np.mean(np.diff(y, axis=0))
-            spacings = (dy, dx)  # Note the order (y, x)
-
-            # Structure the wind field
-            windfield = np.stack((u, v), axis=-1)  # Shape: (num_y, num_x, 2)
-
-            # Handle NaNs in windfield
-            if np.isnan(windfield).any():
-                print("Warning: NaN values found in windfield. Replacing with zeros.")
-                windfield = np.nan_to_num(windfield)
-
-            # Initialize nHHD class
-            nhhd = nHHD(grid=(ny, nx), spacings=spacings)
-
-            # Perform the decomposition
-            nhhd.decompose(windfield)
-
-            # Extract the components
-            non_div = nhhd.r  # Non-divergent component (vector field)
-            non_rot = nhhd.d  # Non-rotational component (vector field)
-            harmonic = nhhd.h  # Harmonic component (vector field)
-
-            # Rotate the components
-            non_div_rot = rotate(non_div, angle=angle, reshape=True, order=1)
-            non_rot_rot = rotate(non_rot, angle=angle, reshape=True, order=1)
-            harmonic_rot = rotate(harmonic, angle=angle, reshape=True, order=1)
             
-            # Rotate the coordinates
-            x_rot = rotate(x, angle=angle, reshape=True, order=1)
-            y_rot = rotate(y, angle=angle, reshape=True, order=1)
+            # Rotate the full field
+            u_rotated = self.rotate_field(u, angle)
+            v_rotated = self.rotate_field(v, angle)
+            x_rotated = self.rotate_field(x, angle)
+            y_rotated = self.rotate_field(y, angle)
 
-            # Determine the indices for cropping
-            ymin = self.ymins[idx]
-            ymax = self.ymaxs[idx]
-            xmin = self.xmins[idx]
-            xmax = self.xmaxs[idx]
+            ny, nx = u_rotated.shape
 
-            # Ensure indices are within the bounds of the rotated arrays
-            ny_rot, nx_rot = non_div_rot.shape[:2]
-            ymin = max(0, ymin)
-            ymax = min(ny_rot, ymax)
-            xmin = max(0, xmin)
-            xmax = min(nx_rot, xmax)
+            # Original domain boundaries for this time step
+            xmin_t = self.xmins[idx]
+            xmax_t = self.xmaxs[idx]
+            ymin_t = self.ymins[idx]
+            ymax_t = self.ymaxs[idx]
 
-            if ymax <= ymin or xmax <= xmin:
-                print("Invalid indices for cropping.")
-                continue
+            for i in range(self.num_domains):
+                expansion = expansions[i]
 
-            # **New Addition: Plot the full rotated irrotational component with cropping rectangle**
-            if self.plot:
-                self.plot_wind_field(
-                    component=non_div_rot,
-                    xmin=xmin,
-                    xmax=xmax,
-                    ymin=ymin,
-                    ymax=ymax,
-                    title=f'Rotated Non-Divergent Component with Crop Rectangle (File {idx+1})',
-                    is_vector=True  # Indicate that this is a vector field
+                # Adjust domain boundaries
+                xmin_i = max(0, xmin_t - expansion)
+                xmax_i = min(nx, xmax_t + expansion)
+                ymin_i = max(0, ymin_t - expansion)
+                ymax_i = min(ny, ymax_t + expansion)
+
+                # Ensure indices are integers
+                xmin_i = int(xmin_i)
+                xmax_i = int(xmax_i)
+                ymin_i = int(ymin_i)
+                ymax_i = int(ymax_i)
+
+                # Crop the domain
+                u_frontal = u_rotated[ymin_i:ymax_i, xmin_i:xmax_i]
+                v_frontal = v_rotated[ymin_i:ymax_i, xmin_i:xmax_i]
+                x_frontal = x_rotated[ymin_i:ymax_i, xmin_i:xmax_i]
+                y_frontal = y_rotated[ymin_i:ymax_i, xmin_i:xmax_i]
+
+                # Calculate approximate horizontal grid resolution for the frontal domain
+                dx = np.mean(np.diff(x_frontal, axis=1))
+                dy = np.mean(np.diff(y_frontal, axis=0))
+
+                # Perform Helmholtz Decomposition on the frontal domain
+                windfield = np.stack((u_frontal, v_frontal), axis=-1)
+                _, _, harmonic = self.perform_decomposition(windfield, dx, dy)
+
+                # Separate wind components
+                u_harmonic = harmonic[..., 0]
+                v_harmonic = harmonic[..., 1]
+
+                # Append harmonic components to lists
+                u_harmonic_lists[i].append(u_harmonic)
+                v_harmonic_lists[i].append(v_harmonic)
+
+                # Calculate vorticity
+                vorticity_frontal = self.calculate_vorticity(u_frontal, v_frontal, dx, dy)
+                vorticity_front_mean = np.mean(vorticity_frontal[vorticity_frontal > 0.003])
+                vorticity_ambient_mean = np.mean(vorticity_frontal[vorticity_frontal < 0.000])
+
+                # Calculate mu for the strain threshold equation
+                vorticity_width = 2.5
+                perturbation_wavelength = 17.5
+                mu = vorticity_width / perturbation_wavelength
+                # mu = 0
+
+                # Calculate theoretical strain threshold
+                strain_threshold = self.calculate_strain_threshold(
+                    vorticity_front_mean, vorticity_ambient_mean, self.f, mu
                 )
+                strain_threshold_lists[i].append(strain_threshold)
 
-            # Crop the rotated components
-            non_div_cropped = non_div_rot[ymin:ymax, xmin:xmax]
-            non_rot_cropped = non_rot_rot[ymin:ymax, xmin:xmax]
-            harmonic_cropped = harmonic_rot[ymin:ymax, xmin:xmax]
-            x_cropped = x_rot[ymin:ymax, xmin:xmax]
-            y_cropped = y_rot[ymin:ymax, xmin:xmax]
-            
-            non_div_list.append(non_div_cropped)
-            non_rot_list.append(non_rot_cropped)
-            harmonic_list.append(harmonic_cropped)    
-            
-            # Plot the components
-            if self.plot:
-                self.plot_components(x_cropped, y_cropped, non_div_cropped, non_rot_cropped, harmonic_cropped, idx)
-        
-        return non_div_list, non_rot_list, harmonic_list
+                print('theoretical strain:', strain_threshold)
+
+                # Calculate harmonic strain
+                stretching_deformation = self.calculate_frontal_strain(v_harmonic, u_harmonic, dy, dx, self.event_type)
+                frontal_strain_lists[i].append(stretching_deformation)         
+
+                print('frontal strain:', stretching_deformation)
+
+                # Optionally, plot domain location for visual check
+                if self.plot:
+                    self.plot_frontal_domain(
+                        x_rotated, y_rotated, u_rotated, v_rotated, idx, xmin_i, xmax_i, ymin_i, ymax_i
+                    )
+
+        return strain_threshold_lists, frontal_strain_lists, self.selected_files
+    

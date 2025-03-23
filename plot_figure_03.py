@@ -413,15 +413,6 @@ class VorticityPlotter:
         return distances_km
     
     def run(self, output_filename='figure_03.png'):
-        """
-        Executes the full workflow: computes vorticity and generates the plot.
-        
-        Parameters:
-        - output_filename (str): Filename to save the figure.
-        
-        Returns:
-        - distances_km (list): List of distances between marker pairs in kilometers.
-        """
         self.compute_collapsed_vorticity()
         distances_km = self.plot_vorticity_with_inset(output_filename)
         return distances_km
