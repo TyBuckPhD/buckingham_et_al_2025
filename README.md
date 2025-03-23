@@ -4,9 +4,9 @@ This repository contains the code and data processing scripts for the paper
 Relevance of Horizontal Shearing Instability" by Buckingham et al. (2025). 
 It includes scripts for:
 
-> Processing WRF and UKMO rainfall composite files
-> Performing the Helmholtz Decomposition on a limited domain
-> Backwards trajectory analysis from gridded data
+- Processing WRF and UKMO rainfall composite files
+- Performing the Helmholtz Decomposition on a limited domain
+- Backwards trajectory analysis from gridded data
 
 ## Repository Structure
 buckingham_et_al_2025/   # Main package with core modules
