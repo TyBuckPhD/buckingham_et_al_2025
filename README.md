@@ -22,6 +22,7 @@ It includes scripts for:
 conda env create -f environment.yml
 conda activate your_env_name
 ```
+Please be aware the current environment.yml file is bloated and can be trimmed.
 
 ## Usage
 Unfortunately, the provided scripts are currently hard-coded to specific WRF output (which was far too large to be added into the repository); therefore, the provided scripts are expected to be used as guidelines for replication rather than as a flexible package. Development of such a package would require implementing an automated cold front detection algorithm for high-resolution gridded data - an exceedingly challenging task. 
